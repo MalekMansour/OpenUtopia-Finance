@@ -18,6 +18,9 @@ class FinanceToolApp:
         # Set up toolbar
         self.setup_toolbar()
 
+        # Set up data entry form
+        self.setup_data_entry_form()
+
         # Set up matplotlib figure
         self.figure, self.ax = plt.subplots()
         self.canvas = FigureCanvasTkAgg(self.figure, master=root)
@@ -68,6 +71,28 @@ class FinanceToolApp:
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
                       subplot_icon, graph_icon, edit_icon, theme_icon, save_icon]
+
+    def setup_data_entry_form(self):
+        """Sets up the data entry form for user input."""
+        entry_frame = tk.Frame(self.root)
+        entry_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
+
+        tk.Label(entry_frame, text="Period:").grid(row=0, column=0, padx=5, pady=5)
+        self.period_entry = tk.Entry(entry_frame)
+        self.period_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        tk.Label(entry_frame, text="Amount:").grid(row=0, column=2, padx=5, pady=5)
+        self.amount_entry = tk.Entry(entry_frame)
+        self.amount_entry.grid(row=0, column=3, padx=5, pady=5)
+
+        add_button = tk.Button(entry_frame, text="Add Data", command=self.add_income_data)
+        add_button.grid(row=0, column=4, padx=5, pady=5)
+
+        clear_button = tk.Button(entry_frame, text="Clear Data", command=self.clear_income_data)
+        clear_button.grid(row=0, column=5, padx=5, pady=5)
+
+        update_button = tk.Button(entry_frame, text="Update Graph", command=self.update_graph)
+        update_button.grid(row=0, column=6, padx=5, pady=5)
 
     def resize_icon(self, image_path, size):
         """Resizes an icon to the specified size and returns a PhotoImage."""
@@ -156,24 +181,37 @@ class FinanceToolApp:
             self.figure.savefig(save_path)
             messagebox.showinfo("Info", f"Graph saved as {save_path}")
 
+    def add_income_data(self):
+        """Adds income data from the form to the dataset."""
+        try:
+            period = int(self.period_entry.get())
+            amount = float(self.amount_entry.get())
+            self.income_data = self.income_data.append({"Period": period, "Amount": amount}, ignore_index=True)
+            self.history.append(self.income_data.copy())
+            self.history_index += 1
+            self.update_graph()
+        except ValueError:
+            messagebox.showerror("Error", "Invalid input. Please enter valid numbers for period and amount.")
+
+    def clear_income_data(self):
+        """Clears all income data."""
+        self.income_data = pd.DataFrame(columns=["Period", "Amount"])
+        self.history = []
+        self.history_index = -1
+        self.update_graph()
+
     def update_graph(self):
-        """Updates the graph based on current income data."""
+        """Updates the graph with the current income data."""
         self.ax.clear()
-
-        if self.graph_type == "line":
-            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], label="Income Over Time")
-        elif self.graph_type == "bar":
-            self.ax.bar(self.income_data["Period"], self.income_data["Amount"], label="Income Over Time")
-        elif self.graph_type == "candlestick":
-            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], label="Candlestick")  # Placeholder
-
-        self.ax.set_xlabel("Period")
-        self.ax.set_ylabel("Amount")
-        self.ax.legend()
+        if not self.income_data.empty:
+            if self.graph_type == "line":
+                self.income_data.plot(x="Period", y="Amount", ax=self.ax, legend=False)
+            elif self.graph_type == "bar":
+                self.income_data.plot(kind="bar", x="Period", y="Amount", ax=self.ax, legend=False)
+            elif self.graph_type == "candlestick":
+                self.ax.plot(self.income_data["Period"], self.income_data["Amount"], 'o-')
         self.canvas.draw()
 
-
-# Run the app
 if __name__ == "__main__":
     root = tk.Tk()
     app = FinanceToolApp(root)
