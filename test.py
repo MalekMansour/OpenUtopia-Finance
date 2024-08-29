@@ -176,12 +176,12 @@ class OpenUtopiaFinanceApp:
         themes = {
             "Default": ("white", "blue", "default"),
             "Dark Mode": ("#1e1e1e", "blue", "dark"),
-            "Hacker Mode": ("black", "green", "hacker"),
+            "Blue": ("#001f3f", "white", "blue"),
+            "Hacker": ("black", "#06D001", "hacker"),
             "Red Mode": ("red", "black", "red"),
-            "Blue Mode": ("#001f3f", "white", "blue"),
             "Sakura Mode": ("#ffebef", "white", "sakura"),
             "Orange Mode": ("#ff7f24", "white", "orange"),
-            "Purple Mode": ("#6a0dad", "white", "purple")
+            "Purple Mode": ("#8E3E63", "white", "purple")
         }
         theme_names = ", ".join(themes.keys())
         theme_choice = simpledialog.askstring("Select Theme", f"Choose a theme: {theme_names}")
