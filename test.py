@@ -1,10 +1,11 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, simpledialog, messagebox
 from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import pandas as pd
 from PIL import Image, ImageTk
+
 
 class FinanceToolApp:
     def __init__(self, root):
@@ -21,10 +22,17 @@ class FinanceToolApp:
         self.figure, self.ax = plt.subplots()
         self.canvas = FigureCanvasTkAgg(self.figure, master=root)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        
+
         # Matplotlib Navigation Toolbar
         self.nav_toolbar = NavigationToolbar2Tk(self.canvas, root)
         self.nav_toolbar.update()
+
+        # Keep track of graph type
+        self.graph_type = "line"
+
+        # History for back/forward functionality
+        self.history = []
+        self.history_index = -1
 
     def setup_toolbar(self):
         toolbar_frame = tk.Frame(self.root)
@@ -62,6 +70,7 @@ class FinanceToolApp:
                       subplot_icon, graph_icon, edit_icon, theme_icon, save_icon]
 
     def resize_icon(self, image_path, size):
+        """Resizes an icon to the specified size and returns a PhotoImage."""
         image = Image.open(image_path)
         image = image.resize(size, Image.Resampling.LANCZOS)
         return ImageTk.PhotoImage(image)
@@ -76,6 +85,8 @@ class FinanceToolApp:
         """Loads a graph from a CSV file."""
         try:
             self.income_data = pd.read_csv(filename)
+            self.history.append(self.income_data.copy())
+            self.history_index += 1
             self.update_graph()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load graph: {e}")
@@ -87,44 +98,55 @@ class FinanceToolApp:
         self.canvas.draw()
 
     def go_back(self):
-        """Navigates back in the graph (placeholder)."""
-        messagebox.showinfo("Info", "Go back not implemented.")
+        """Navigates back in the graph history."""
+        if self.history_index > 0:
+            self.history_index -= 1
+            self.income_data = self.history[self.history_index].copy()
+            self.update_graph()
 
     def go_forward(self):
-        """Navigates forward in the graph (placeholder)."""
-        messagebox.showinfo("Info", "Go forward not implemented.")
+        """Navigates forward in the graph history."""
+        if self.history_index < len(self.history) - 1:
+            self.history_index += 1
+            self.income_data = self.history[self.history_index].copy()
+            self.update_graph()
 
     def enable_move(self):
-        """Enables the move functionality (placeholder)."""
-        messagebox.showinfo("Info", "Move functionality not implemented.")
+        """Enables the move functionality."""
+        self.nav_toolbar.pan()
 
     def enable_zoom(self):
-        """Enables the zoom functionality (placeholder)."""
-        messagebox.showinfo("Info", "Zoom functionality not implemented.")
+        """Enables the zoom functionality."""
+        self.nav_toolbar.zoom()
 
     def configure_subplots(self):
-        """Configures subplots (placeholder)."""
-        messagebox.showinfo("Info", "Configure subplots not implemented.")
+        """Configures subplots."""
+        plt.subplots_adjust(left=0.1, bottom=0.3, right=0.9, top=0.7)
+        self.update_graph()
 
     def edit_graph_type(self):
         """Allows the user to choose the graph type."""
-        graph_type = messagebox.askquestion("Select Graph Type", "Choose the graph type:\n- Candlestick\n- Linear\n- Bar", icon='question')
-        if graph_type == 'yes':
-            messagebox.showinfo("Info", "Graph type change functionality not implemented.")
+        options = ["Line", "Bar", "Candlestick"]
+        graph_type = simpledialog.askstring("Select Graph Type", f"Choose the graph type: {', '.join(options)}")
+        if graph_type:
+            self.graph_type = graph_type.lower()
+            self.update_graph()
 
     def edit_income(self):
         """Allows the user to edit income data."""
         amount = simpledialog.askfloat("Edit Income", "Enter the new income amount:")
         if amount is not None:
-            # Update income data and refresh graph
             self.income_data = self.income_data.append({"Period": len(self.income_data) + 1, "Amount": amount}, ignore_index=True)
+            self.history.append(self.income_data.copy())
+            self.history_index += 1
             self.update_graph()
 
     def change_theme(self):
         """Allows the user to change the theme."""
-        theme = messagebox.askquestion("Select Theme", "Choose the theme:\n- Light Mode\n- Dark Mode", icon='question')
-        if theme == 'yes':
-            plt.style.use('ggplot')  # Example: Applying a matplotlib theme
+        options = ["Light", "Dark", "Solarized", "ggplot"]
+        theme = simpledialog.askstring("Select Theme", f"Choose the theme: {', '.join(options)}")
+        if theme:
+            plt.style.use(theme.lower())
             self.update_graph()
 
     def save_graph(self):
@@ -137,11 +159,19 @@ class FinanceToolApp:
     def update_graph(self):
         """Updates the graph based on current income data."""
         self.ax.clear()
-        self.ax.plot(self.income_data["Period"], self.income_data["Amount"], label="Income Over Time")
+
+        if self.graph_type == "line":
+            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], label="Income Over Time")
+        elif self.graph_type == "bar":
+            self.ax.bar(self.income_data["Period"], self.income_data["Amount"], label="Income Over Time")
+        elif self.graph_type == "candlestick":
+            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], label="Candlestick")  # Placeholder
+
         self.ax.set_xlabel("Period")
         self.ax.set_ylabel("Amount")
         self.ax.legend()
         self.canvas.draw()
+
 
 # Run the app
 if __name__ == "__main__":
