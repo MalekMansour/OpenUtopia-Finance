@@ -4,6 +4,7 @@ from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import pandas as pd
+from PIL import Image, ImageTk
 
 class FinanceToolApp:
     def __init__(self, root):
@@ -29,18 +30,20 @@ class FinanceToolApp:
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
 
-        # Icons and buttons
-        open_icon = tk.PhotoImage(file="icons/folder.png")
-        home_icon = tk.PhotoImage(file="icons/home.png")
-        back_icon = tk.PhotoImage(file="icons/back.png")
-        forward_icon = tk.PhotoImage(file="icons/forward.png")
-        move_icon = tk.PhotoImage(file="icons/move.png")
-        zoom_icon = tk.PhotoImage(file="icons/zoom.png")
-        subplot_icon = tk.PhotoImage(file="icons/subplot.png")
-        graph_icon = tk.PhotoImage(file="icons/graph.png")
-        edit_icon = tk.PhotoImage(file="icons/edit.png")
-        theme_icon = tk.PhotoImage(file="icons/theme.png")
-        save_icon = tk.PhotoImage(file="icons/save.png")
+        # Icons and buttons with resized icons
+        icon_size = (24, 24)  # Set desired icon size
+
+        open_icon = self.resize_icon("icons/folder.png", icon_size)
+        home_icon = self.resize_icon("icons/home.png", icon_size)
+        back_icon = self.resize_icon("icons/back.png", icon_size)
+        forward_icon = self.resize_icon("icons/forward.png", icon_size)
+        move_icon = self.resize_icon("icons/move.png", icon_size)
+        zoom_icon = self.resize_icon("icons/zoom.png", icon_size)
+        subplot_icon = self.resize_icon("icons/subplot.png", icon_size)
+        graph_icon = self.resize_icon("icons/graph.png", icon_size)
+        edit_icon = self.resize_icon("icons/edit.png", icon_size)
+        theme_icon = self.resize_icon("icons/theme.png", icon_size)
+        save_icon = self.resize_icon("icons/save.png", icon_size)
 
         tk.Button(toolbar_frame, image=open_icon, command=self.open_file).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=home_icon, command=self.reset_view).pack(side=tk.LEFT, padx=2)
@@ -58,76 +61,86 @@ class FinanceToolApp:
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
                       subplot_icon, graph_icon, edit_icon, theme_icon, save_icon]
 
-    # Toolbar functionalities
+    def resize_icon(self, image_path, size):
+        image = Image.open(image_path)
+        image = image.resize(size, Image.Resampling.LANCZOS)
+        return ImageTk.PhotoImage(image)
+
     def open_file(self):
-        file_path = filedialog.askopenfilename(title="Select Graph File", filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
-        if file_path:
-            img = plt.imread(file_path)
-            self.ax.imshow(img)
-            self.canvas.draw()
+        """Opens a file dialog to select an existing graph file."""
+        filename = filedialog.askopenfilename(title="Open Graph", filetypes=[("CSV Files", "*.csv"), ("All Files", "*.*")])
+        if filename:
+            self.load_graph(filename)
+
+    def load_graph(self, filename):
+        """Loads a graph from a CSV file."""
+        try:
+            self.income_data = pd.read_csv(filename)
+            self.update_graph()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load graph: {e}")
 
     def reset_view(self):
+        """Resets the view to the default state."""
         self.ax.set_xlim(auto=True)
         self.ax.set_ylim(auto=True)
         self.canvas.draw()
 
     def go_back(self):
-        # Implement go back functionality
-        pass
+        """Navigates back in the graph (placeholder)."""
+        messagebox.showinfo("Info", "Go back not implemented.")
 
     def go_forward(self):
-        # Implement go forward functionality
-        pass
+        """Navigates forward in the graph (placeholder)."""
+        messagebox.showinfo("Info", "Go forward not implemented.")
 
     def enable_move(self):
-        self.nav_toolbar.pan()
-        messagebox.showinfo("Info", "Move mode activated")
+        """Enables the move functionality (placeholder)."""
+        messagebox.showinfo("Info", "Move functionality not implemented.")
 
     def enable_zoom(self):
-        self.nav_toolbar.zoom()
-        messagebox.showinfo("Info", "Zoom mode activated")
+        """Enables the zoom functionality (placeholder)."""
+        messagebox.showinfo("Info", "Zoom functionality not implemented.")
 
     def configure_subplots(self):
-        self.nav_toolbar.configure_subplots()
-    
+        """Configures subplots (placeholder)."""
+        messagebox.showinfo("Info", "Configure subplots not implemented.")
+
     def edit_graph_type(self):
-        # Let the user pick a graph type
-        graph_types = ["Bar", "Line", "Candlestick"]
-        choice = tk.simpledialog.askstring("Choose Graph Type", "Select graph type: " + ", ".join(graph_types))
-        if choice in graph_types:
-            # Implement graph type change functionality here
-            pass
+        """Allows the user to choose the graph type."""
+        graph_type = messagebox.askquestion("Select Graph Type", "Choose the graph type:\n- Candlestick\n- Linear\n- Bar", icon='question')
+        if graph_type == 'yes':
+            messagebox.showinfo("Info", "Graph type change functionality not implemented.")
 
     def edit_income(self):
-        # Edit income data
-        self.add_income("New Period", 7000)
-        self.plot_income()
+        """Allows the user to edit income data."""
+        amount = simpledialog.askfloat("Edit Income", "Enter the new income amount:")
+        if amount is not None:
+            # Update income data and refresh graph
+            self.income_data = self.income_data.append({"Period": len(self.income_data) + 1, "Amount": amount}, ignore_index=True)
+            self.update_graph()
 
     def change_theme(self):
-        # Implement theme changing logic
-        themes = ["Light", "Dark", "Solarized"]
-        choice = tk.simpledialog.askstring("Choose Theme", "Select theme: " + ", ".join(themes))
-        if choice:
-            # Implement theme change here
-            pass
+        """Allows the user to change the theme."""
+        theme = messagebox.askquestion("Select Theme", "Choose the theme:\n- Light Mode\n- Dark Mode", icon='question')
+        if theme == 'yes':
+            plt.style.use('ggplot')  # Example: Applying a matplotlib theme
+            self.update_graph()
 
     def save_graph(self):
-        save_path = filedialog.asksaveasfilename(title="Save Graph", defaultextension=".png", filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
+        """Saves the current graph as an image file."""
+        save_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("All Files", "*.*")])
         if save_path:
             self.figure.savefig(save_path)
-            messagebox.showinfo("Saved", f"Graph saved to {save_path}")
+            messagebox.showinfo("Info", f"Graph saved as {save_path}")
 
-    # Data handling and plotting
-    def add_income(self, period, amount):
-        new_data = pd.DataFrame({"Period": [period], "Amount": [amount]})
-        self.income_data = pd.concat([self.income_data, new_data], ignore_index=True)
-
-    def plot_income(self):
+    def update_graph(self):
+        """Updates the graph based on current income data."""
         self.ax.clear()
-        self.ax.bar(self.income_data['Period'], self.income_data['Amount'], color='green')
-        self.ax.set_xlabel('Period')
-        self.ax.set_ylabel('Amount ($)')
-        self.ax.set_title('Income Visualization')
+        self.ax.plot(self.income_data["Period"], self.income_data["Amount"], label="Income Over Time")
+        self.ax.set_xlabel("Period")
+        self.ax.set_ylabel("Amount")
+        self.ax.legend()
         self.canvas.draw()
 
 # Run the app
