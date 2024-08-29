@@ -30,12 +30,16 @@ class OpenUtopiaFinanceApp:
         self.nav_toolbar = NavigationToolbar2Tk(self.canvas, root)
         self.nav_toolbar.update()
 
-        # Keep track of graph type
+        # Keep track of graph type and theme
         self.graph_type = "line"
+        self.current_theme = "default"
 
         # History for back/forward functionality
         self.history = []
         self.history_index = -1
+
+        # Set initial theme
+        self.apply_theme("white", "blue")
 
     def setup_toolbar(self):
         toolbar_frame = tk.Frame(self.root)
@@ -168,22 +172,57 @@ class OpenUtopiaFinanceApp:
             self.update_graph()
 
     def change_theme(self):
-        """Allows the user to change the theme."""
-        options = ["Light", "Dark", "Solarized", "ggplot"]
-        theme = simpledialog.askstring("Select Theme", f"Choose the theme: {', '.join(options)}")
-        if theme:
-            plt.style.use(theme.lower())
-            self.update_graph()
+        """Allows the user to change the application theme."""
+        themes = {
+            "Default": ("white", "blue", "default"),
+            "Dark Mode": ("#1e1e1e", "blue", "dark"),
+            "Hacker Mode": ("black", "green", "hacker"),
+            "Red Mode": ("red", "black", "red"),
+            "Blue Mode": ("#001f3f", "white", "blue"),
+            "Sakura Mode": ("#ffebef", "white", "sakura"),
+            "Orange Mode": ("#ff7f24", "white", "orange"),
+            "Purple Mode": ("#6a0dad", "white", "purple")
+        }
+        theme_names = ", ".join(themes.keys())
+        theme_choice = simpledialog.askstring("Select Theme", f"Choose a theme: {theme_names}")
+        if theme_choice and theme_choice in themes:
+            bg_color, fg_color, self.current_theme = themes[theme_choice]
+            self.apply_theme(bg_color, fg_color)
+
+    def apply_theme(self, bg_color, fg_color):
+        """Applies the selected theme to the app."""
+        # Set background and foreground color for the main window
+        self.root.configure(bg=bg_color)
+
+        # Update the colors for all widgets
+        for widget in self.root.winfo_children():
+            # Apply background color
+            widget.configure(bg=bg_color)
+        
+            # Apply foreground color if the widget supports it
+            if isinstance(widget, (tk.Label, tk.Button, tk.Entry, tk.Text, tk.Checkbutton, tk.Radiobutton)):
+                widget.configure(fg=fg_color)
+    
+        # Update the matplotlib graph background and axis colors
+        self.ax.set_facecolor(bg_color)
+        self.ax.spines['bottom'].set_color(fg_color)
+        self.ax.spines['left'].set_color(fg_color)
+        self.ax.spines['top'].set_color(fg_color)
+        self.ax.spines['right'].set_color(fg_color)
+        self.ax.xaxis.label.set_color(fg_color)
+        self.ax.yaxis.label.set_color(fg_color)
+        self.ax.tick_params(axis='x', colors=fg_color)
+        self.ax.tick_params(axis='y', colors=fg_color)
+        self.update_graph()
 
     def save_graph(self):
-        """Saves the current graph as an image file."""
-        save_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("All Files", "*.*")])
-        if save_path:
-            self.figure.savefig(save_path)
-            messagebox.showinfo("Info", f"Graph saved as {save_path}")
+        """Saves the current graph as an image."""
+        filename = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG Files", "*.png"), ("All Files", "*.*")])
+        if filename:
+            self.figure.savefig(filename)
 
     def add_income_data(self):
-        """Adds income data from the form to the dataset."""
+        """Adds income data to the graph."""
         try:
             period = int(self.period_entry.get())
             amount = float(self.amount_entry.get())
