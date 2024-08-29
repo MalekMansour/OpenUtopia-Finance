@@ -7,10 +7,10 @@ import pandas as pd
 from PIL import Image, ImageTk
 
 
-class FinanceToolApp:
+class OpenUtopiaFinanceApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Finance Tool")
+        self.root.title("OpenUtopia Finance")
 
         # Initialize income data
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
@@ -161,7 +161,8 @@ class FinanceToolApp:
         """Allows the user to edit income data."""
         amount = simpledialog.askfloat("Edit Income", "Enter the new income amount:")
         if amount is not None:
-            self.income_data = self.income_data.append({"Period": len(self.income_data) + 1, "Amount": amount}, ignore_index=True)
+            new_row = pd.DataFrame({"Period": [len(self.income_data) + 1], "Amount": [amount]})
+            self.income_data = pd.concat([self.income_data, new_row], ignore_index=True)
             self.history.append(self.income_data.copy())
             self.history_index += 1
             self.update_graph()
@@ -186,7 +187,8 @@ class FinanceToolApp:
         try:
             period = int(self.period_entry.get())
             amount = float(self.amount_entry.get())
-            self.income_data = self.income_data.append({"Period": period, "Amount": amount}, ignore_index=True)
+            new_row = pd.DataFrame({"Period": [period], "Amount": [amount]})
+            self.income_data = pd.concat([self.income_data, new_row], ignore_index=True)
             self.history.append(self.income_data.copy())
             self.history_index += 1
             self.update_graph()
@@ -212,7 +214,8 @@ class FinanceToolApp:
                 self.ax.plot(self.income_data["Period"], self.income_data["Amount"], 'o-')
         self.canvas.draw()
 
+
 if __name__ == "__main__":
     root = tk.Tk()
-    app = FinanceToolApp(root)
+    app = OpenUtopiaFinanceApp(root)
     root.mainloop()
