@@ -39,7 +39,7 @@ class OpenUtopiaFinanceApp:
         self.history_index = -1
 
         # Set initial theme
-        self.apply_theme("#F5F7F8", "#001f3f")
+        self.apply_theme("#F5F7F8", "black")
 
     def setup_toolbar(self):
         toolbar_frame = tk.Frame(self.root)
@@ -174,14 +174,14 @@ class OpenUtopiaFinanceApp:
     def change_theme(self):
         """Allows the user to change the application theme."""
         themes = {
-            "Default": ("#F5F7F8", "#001f3f", "default"),
+            "Default": ("#F5F7F8", "black", "default"),
             "Dark": ("#1e1e1e", "blue", "dark"),
-            "Blue": ("#001f3f", "white", "blue"),
+            "Blue": ("#001f3f", "black", "blue"),
             "Hacker": ("black", "#06D001", "hacker"),
             "Red": ("#B31312", "black", "red"),
-            "Sakura": ("#FF8C9E", "#001f3f", "sakura"),
-            "Orange": ("#E3651D", "#001f3f", "orange"),
-            "Acid": ("#392467", "#E2BBE9", "purple")
+            "Sakura": ("#FF8C9E", "black", "sakura"),
+            "Orange": ("#E3651D", "black", "orange"),
+            "Acid": ("#392467", "black", "purple")
         }
         theme_names = ", ".join(themes.keys())
         theme_choice = simpledialog.askstring("Select Theme", f"Choose a theme: {theme_names}")
