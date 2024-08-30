@@ -41,6 +41,9 @@ class OpenUtopiaFinanceApp:
         # Set initial theme
         self.apply_theme("#F5F7F8", "black")
 
+        # Grid visibility state
+        self.grid_visible = False
+
     def setup_toolbar(self):
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
@@ -59,6 +62,7 @@ class OpenUtopiaFinanceApp:
         edit_icon = self.resize_icon("icons/edit.png", icon_size)
         theme_icon = self.resize_icon("icons/theme.png", icon_size)
         save_icon = self.resize_icon("icons/save.png", icon_size)
+        grid_icon = self.resize_icon("icons/grid.png", icon_size)
 
         tk.Button(toolbar_frame, image=open_icon, command=self.open_file).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=home_icon, command=self.reset_view).pack(side=tk.LEFT, padx=2)
@@ -71,10 +75,11 @@ class OpenUtopiaFinanceApp:
         tk.Button(toolbar_frame, image=edit_icon, command=self.edit_income).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=theme_icon, command=self.change_theme).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=save_icon, command=self.save_graph).pack(side=tk.LEFT, padx=2)
+        tk.Button(toolbar_frame, image=grid_icon, command=self.toggle_grid).pack(side=tk.LEFT, padx=2)
 
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
-                      subplot_icon, graph_icon, edit_icon, theme_icon, save_icon]
+                      subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon]
 
     def setup_data_entry_form(self):
         """Sets up the data entry form for user input."""
@@ -190,24 +195,32 @@ class OpenUtopiaFinanceApp:
             self.apply_theme(bg_color, fg_color)
 
     def apply_theme(self, bg_color, fg_color):
-        """Applies the selected theme to the app."""
-        # Set background and foreground color for the main window
-        self.root.configure(bg=bg_color)
-
-        # Update the colors for all widgets
-        for widget in self.root.winfo_children():
-            # Apply background color
-            widget.configure(bg=bg_color)
-        
-            # Apply foreground color if the widget supports it
-            if isinstance(widget, (tk.Label, tk.Button, tk.Entry, tk.Text, tk.Checkbutton, tk.Radiobutton)):
-                widget.configure(fg=fg_color)
+        """Applies the selected theme."""
+        self.root.config(bg=bg_color)
     
-        # Update the matplotlib graph background and axis colors
+        for widget in self.root.winfo_children():
+            try:
+                widget.config(bg=bg_color, fg=fg_color)
+            except tk.TclError:
+                widget.config(bg=bg_color)
+
+        # Update the graph
         self.ax.set_facecolor(bg_color)
         self.ax.spines['bottom'].set_color(fg_color)
-        self.ax.spines['left'].set_color(fg_color)
         self.ax.spines['top'].set_color(fg_color)
+        self.ax.spines['left'].set_color(fg_color)
+        self.ax.spines['right'].set_color(fg_color)
+        self.ax.xaxis.label.set_color(fg_color)
+        self.ax.yaxis.label.set_color(fg_color)
+        self.ax.tick_params(axis='x', colors=fg_color)
+        self.ax.tick_params(axis='y', colors=fg_color)
+        self.update_graph()
+
+        # Update the graph
+        self.ax.set_facecolor(bg_color)
+        self.ax.spines['bottom'].set_color(fg_color)
+        self.ax.spines['top'].set_color(fg_color)
+        self.ax.spines['left'].set_color(fg_color)
         self.ax.spines['right'].set_color(fg_color)
         self.ax.xaxis.label.set_color(fg_color)
         self.ax.yaxis.label.set_color(fg_color)
@@ -216,41 +229,61 @@ class OpenUtopiaFinanceApp:
         self.update_graph()
 
     def save_graph(self):
-        """Saves the current graph as an image."""
-        filename = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG Files", "*.png"), ("All Files", "*.*")])
-        if filename:
-            self.figure.savefig(filename)
+        """Saves the current graph as an image file."""
+        file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("All Files", "*.*")])
+        if file_path:
+            self.figure.savefig(file_path)
+
+    def toggle_grid(self):
+        """Toggles the grid visibility on the graph."""
+        self.grid_visible = not self.grid_visible
+        self.ax.grid(visible=self.grid_visible, which='both', linestyle='--', linewidth=0.5)
+        self.update_graph()
 
     def add_income_data(self):
-        """Adds income data to the graph."""
-        try:
-            period = int(self.period_entry.get())
-            amount = float(self.amount_entry.get())
-            new_row = pd.DataFrame({"Period": [period], "Amount": [amount]})
-            self.income_data = pd.concat([self.income_data, new_row], ignore_index=True)
-            self.history.append(self.income_data.copy())
-            self.history_index += 1
-            self.update_graph()
-        except ValueError:
-            messagebox.showerror("Error", "Invalid input. Please enter valid numbers for period and amount.")
+        """Adds a new data point to the income data."""
+        period = self.period_entry.get()
+        amount = self.amount_entry.get()
+
+        if period and amount:
+            try:
+                period = int(period)
+                amount = float(amount)
+                self.income_data = self.income_data.append({"Period": period, "Amount": amount}, ignore_index=True)
+                self.history.append(self.income_data.copy())
+                self.history_index += 1
+                self.update_graph()
+                self.clear_entries()
+            except ValueError:
+                messagebox.showerror("Invalid Input", "Period must be an integer and Amount must be a number.")
+        else:
+            messagebox.showerror("Invalid Input", "Both Period and Amount fields must be filled.")
+
+    def clear_entries(self):
+        """Clears the data entry form."""
+        self.period_entry.delete(0, tk.END)
+        self.amount_entry.delete(0, tk.END)
 
     def clear_income_data(self):
-        """Clears all income data."""
+        """Clears all the income data."""
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
-        self.history = []
-        self.history_index = -1
+        self.history.append(self.income_data.copy())
+        self.history_index += 1
         self.update_graph()
 
     def update_graph(self):
         """Updates the graph with the current income data."""
         self.ax.clear()
-        if not self.income_data.empty:
-            if self.graph_type == "line":
-                self.income_data.plot(x="Period", y="Amount", ax=self.ax, legend=False)
-            elif self.graph_type == "bar":
-                self.income_data.plot(kind="bar", x="Period", y="Amount", ax=self.ax, legend=False)
-            elif self.graph_type == "candlestick":
-                self.ax.plot(self.income_data["Period"], self.income_data["Amount"], 'o-')
+        if self.graph_type == "line":
+            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], marker='o', linestyle='-')
+        elif self.graph_type == "bar":
+            self.ax.bar(self.income_data["Period"], self.income_data["Amount"])
+        elif self.graph_type == "candlestick":
+            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], marker='o', linestyle='-')
+
+        # Apply grid visibility
+        self.ax.grid(visible=self.grid_visible, which='both', linestyle='--', linewidth=0.5)
+
         self.canvas.draw()
 
 
