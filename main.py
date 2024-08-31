@@ -23,7 +23,6 @@ class OpenUtopiaFinanceApp:
         self.canvas = FigureCanvasTkAgg(self.figure, master=root)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        # Matplotlib Navigation Toolbar
         self.nav_toolbar = NavigationToolbar2Tk(self.canvas, root)
         self.nav_toolbar.update()
 
