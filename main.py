@@ -14,7 +14,6 @@ class OpenUtopiaFinanceApp:
 
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
 
-        # Set up toolbar
         self.setup_toolbar()
 
         # Set up data entry form
