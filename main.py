@@ -12,7 +12,6 @@ class OpenUtopiaFinanceApp:
         self.root = root
         self.root.title("OpenUtopia Finance")
 
-        # Initialize income data
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
 
         # Set up toolbar
