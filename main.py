@@ -34,7 +34,6 @@ class OpenUtopiaFinanceApp:
         self.history = []
         self.history_index = -1
 
-        # Set initial theme
         self.apply_theme("#F5F7F8", "black")
 
     def setup_toolbar(self):
