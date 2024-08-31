@@ -16,7 +16,6 @@ class OpenUtopiaFinanceApp:
 
         self.setup_toolbar()
 
-        # Set up data entry form
         self.setup_data_entry_form()
 
         # Set up matplotlib figure
