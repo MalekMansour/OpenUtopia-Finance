@@ -6,7 +6,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 import pandas as pd
 from PIL import Image, ImageTk
 
-
 class OpenUtopiaFinanceApp:
     def __init__(self, root):
         self.root = root
@@ -206,12 +205,10 @@ class OpenUtopiaFinanceApp:
 
     def apply_theme(self, bg_color, fg_color):
         """Applies the selected theme to the app."""
-        # Set background and foreground color for the main window
         self.root.configure(bg=bg_color)
 
         # Update the colors for all widgets
         for widget in self.root.winfo_children():
-            # Apply background color
             widget.configure(bg=bg_color)
         
             # Apply foreground color if the widget supports it
