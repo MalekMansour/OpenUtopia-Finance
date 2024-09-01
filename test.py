@@ -195,19 +195,31 @@ class OpenUtopiaFinanceApp:
             bg, fg, self.current_theme = themes[theme_name]
             self.apply_theme(bg, fg)
 
-    def apply_theme(self, bg, fg):
-        """Applies the selected theme to the application."""
-        self.root.configure(bg=bg)
+    def apply_theme(self, bg_color, fg_color):
+        """Applies the selected theme to the app."""
+        # Set background and foreground color for the main window
+        self.root.configure(bg=bg_color)
+
+        # Update the colors for all widgets
         for widget in self.root.winfo_children():
-            widget.configure(bg=bg)
-            # Only apply 'fg' if the widget supports it
-            if isinstance(widget, (tk.Label, tk.Button, tk.Entry, tk.Text, tk.Listbox)):
-                widget.configure(fg=fg)
-            if isinstance(widget, tk.Frame):
-                for child in widget.winfo_children():
-                    child.configure(bg=bg)
-                    if isinstance(child, (tk.Label, tk.Button, tk.Entry, tk.Text, tk.Listbox)):
-                        child.configure(fg=fg)
+            # Apply background color
+            widget.configure(bg=bg_color)
+        
+            # Apply foreground color if the widget supports it
+            if isinstance(widget, (tk.Label, tk.Button, tk.Entry, tk.Text, tk.Checkbutton, tk.Radiobutton)):
+                widget.configure(fg=fg_color)
+    
+        # Update the matplotlib graph background and axis colors
+        self.ax.set_facecolor(bg_color)
+        self.ax.spines['bottom'].set_color(fg_color)
+        self.ax.spines['left'].set_color(fg_color)
+        self.ax.spines['top'].set_color(fg_color)
+        self.ax.spines['right'].set_color(fg_color)
+        self.ax.xaxis.label.set_color(fg_color)
+        self.ax.yaxis.label.set_color(fg_color)
+        self.ax.tick_params(axis='x', colors=fg_color)
+        self.ax.tick_params(axis='y', colors=fg_color)
+        self.update_graph()
 
         plt.style.use(self.current_theme)
         self.update_graph()
@@ -245,15 +257,11 @@ class OpenUtopiaFinanceApp:
         self.update_graph()
 
     def update_graph(self):
-        """Updates the graph based on the current income data and graph type."""
+        """Updates the graph with the current data and theme."""
         self.ax.clear()
-
-        if self.graph_type == "line":
-            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], marker="o")
-        elif self.graph_type == "bar":
-            self.ax.bar(self.income_data["Period"], self.income_data["Amount"])
-        elif self.graph_type == "candlestick":
-            messagebox.showinfo("Not Implemented", "Candlestick chart is not implemented yet.")
+        self.ax.plot(self.data['x'], self.data['y'])
+        self.ax.grid(self.grid_state)  # Apply grid state
+        self.canvas.draw()
 
         self.ax.set_xlabel("Period")
         self.ax.set_ylabel("Amount")
