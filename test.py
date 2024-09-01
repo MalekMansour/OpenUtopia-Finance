@@ -258,6 +258,11 @@ class OpenUtopiaFinanceApp:
                 self.ax.plot(self.income_data["Period"], self.income_data["Amount"], 'o-')
         self.canvas.draw()
 
+    def toggle_grid(self):
+        """Toggles the grid on the graph."""
+        self.grid_shown = not self.grid_shown
+        self.ax.grid(self.grid_shown)
+        self.canvas.draw()
 
 if __name__ == "__main__":
     root = tk.Tk()
