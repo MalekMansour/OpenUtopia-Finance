@@ -12,10 +12,13 @@ class OpenUtopiaFinanceApp:
         self.root = root
         self.root.title("OpenUtopia Finance")
 
+        # Initialize income data
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
 
+        # Set up toolbar
         self.setup_toolbar()
 
+        # Set up data entry form
         self.setup_data_entry_form()
 
         # Set up matplotlib figure
@@ -23,6 +26,7 @@ class OpenUtopiaFinanceApp:
         self.canvas = FigureCanvasTkAgg(self.figure, master=root)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+        # Matplotlib Navigation Toolbar
         self.nav_toolbar = NavigationToolbar2Tk(self.canvas, root)
         self.nav_toolbar.update()
 
@@ -34,6 +38,7 @@ class OpenUtopiaFinanceApp:
         self.history = []
         self.history_index = -1
 
+        # Set initial theme
         self.apply_theme("#F5F7F8", "black")
 
     def setup_toolbar(self):
