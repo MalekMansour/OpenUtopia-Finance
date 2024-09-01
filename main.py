@@ -12,6 +12,9 @@ class OpenUtopiaFinanceApp:
         self.root = root
         self.root.title("OpenUtopia Finance")
 
+        # Default Grid Toggled OFF
+        self.grid_shown = False
+
         # Initialize income data
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
 
@@ -45,8 +48,8 @@ class OpenUtopiaFinanceApp:
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
 
-        # Icons and buttons with resized icons
-        icon_size = (24, 24)  # Set desired icon size
+        # Icons Size
+        icon_size = (30, 30)  
 
         open_icon = self.resize_icon("icons/folder.png", icon_size)
         home_icon = self.resize_icon("icons/home.png", icon_size)
@@ -54,6 +57,7 @@ class OpenUtopiaFinanceApp:
         forward_icon = self.resize_icon("icons/forward.png", icon_size)
         move_icon = self.resize_icon("icons/move.png", icon_size)
         zoom_icon = self.resize_icon("icons/zoom.png", icon_size)
+        grid_icon = self.resize_icon("icons/grid.png", icon_size)
         subplot_icon = self.resize_icon("icons/subplot.png", icon_size)
         graph_icon = self.resize_icon("icons/graph.png", icon_size)
         edit_icon = self.resize_icon("icons/edit.png", icon_size)
@@ -66,6 +70,7 @@ class OpenUtopiaFinanceApp:
         tk.Button(toolbar_frame, image=forward_icon, command=self.go_forward).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=move_icon, command=self.enable_move).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=zoom_icon, command=self.enable_zoom).pack(side=tk.LEFT, padx=2)
+        tk.Button(toolbar_frame, image=grid_icon, command=self.toggle_grid).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=subplot_icon, command=self.configure_subplots).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=graph_icon, command=self.edit_graph_type).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=edit_icon, command=self.edit_income).pack(side=tk.LEFT, padx=2)
@@ -74,7 +79,7 @@ class OpenUtopiaFinanceApp:
 
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
-                      subplot_icon, graph_icon, edit_icon, theme_icon, save_icon]
+                      subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon]
 
     def setup_data_entry_form(self):
         """Sets up the data entry form for user input."""
@@ -178,10 +183,10 @@ class OpenUtopiaFinanceApp:
             "Dark": ("#1e1e1e", "blue", "dark"),
             "Blue": ("#001f3f", "black", "blue"),
             "Hacker": ("black", "#06D001", "hacker"),
+            "Orange": ("#E3651D", "black", "orange"),
             "Red": ("#B31312", "black", "red"),
             "Sakura": ("#FF8C9E", "black", "sakura"),
-            "Orange": ("#E3651D", "black", "orange"),
-            "Acid": ("#392467", "black", "purple")
+            "Acid": ("#674188", "black", "acid")
         }
         theme_names = ", ".join(themes.keys())
         theme_choice = simpledialog.askstring("Select Theme", f"Choose a theme: {theme_names}")
@@ -253,6 +258,11 @@ class OpenUtopiaFinanceApp:
                 self.ax.plot(self.income_data["Period"], self.income_data["Amount"], 'o-')
         self.canvas.draw()
 
+    def toggle_grid(self):
+        """Toggles the grid on the graph."""
+        self.grid_shown = not self.grid_shown
+        self.ax.grid(self.grid_shown)
+        self.canvas.draw()
 
 if __name__ == "__main__":
     root = tk.Tk()
