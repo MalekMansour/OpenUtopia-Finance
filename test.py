@@ -87,6 +87,7 @@ class OpenUtopiaFinanceApp:
     def bind_shortcuts(self):
         """Binds keyboard shortcuts."""
         self.root.bind("<Shift-X>", lambda event: self.edit_income())
+        self.root.bind("<Shift-G>", lambda event: self.toggle_grid())
 
     def setup_data_entry_form(self):
         """Sets up the data entry form for user input."""
