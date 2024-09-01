@@ -186,7 +186,7 @@ class OpenUtopiaFinanceApp:
             "Orange": ("#E3651D", "black", "orange"),
             "Red": ("#B31312", "black", "red"),
             "Sakura": ("#FF8C9E", "black", "sakura"),
-            "Acid": ("#392467", "black", "purple")
+            "Acid": ("#674188", "black", "acid")
         }
         theme_names = ", ".join(themes.keys())
         theme_choice = simpledialog.askstring("Select Theme", f"Choose a theme: {theme_names}")
