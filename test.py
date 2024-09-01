@@ -126,9 +126,15 @@ class OpenUtopiaFinanceApp:
             messagebox.showerror("Error", f"Failed to load graph: {e}")
 
     def reset_view(self):
-        """Resets the view to the default state."""
-        self.ax.set_xlim(auto=True)
-        self.ax.set_ylim(auto=True)
+        """Resets the view to the default state and maintains the square aspect ratio."""
+        # Reset the axis limits to show all data
+        self.ax.set_xlim(self.income_data["Period"].min(), self.income_data["Period"].max())
+        self.ax.set_ylim(self.income_data["Amount"].min(), self.income_data["Amount"].max())
+    
+        # Maintain square aspect ratio
+        self.ax.set_aspect('equal', 'box')
+    
+        # Redraw the canvas to reflect changes
         self.canvas.draw()
 
     def go_back(self):
