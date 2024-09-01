@@ -46,7 +46,7 @@ class OpenUtopiaFinanceApp:
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
 
         # Icons and buttons with resized icons
-        icon_size = (24, 24)  # Set desired icon size
+        icon_size = (28, 28)  
 
         open_icon = self.resize_icon("icons/folder.png", icon_size)
         home_icon = self.resize_icon("icons/home.png", icon_size)
