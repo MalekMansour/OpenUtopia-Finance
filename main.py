@@ -6,7 +6,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 import pandas as pd
 from PIL import Image, ImageTk
 
-
 class OpenUtopiaFinanceApp:
     def __init__(self, root):
         self.root = root
@@ -44,12 +43,15 @@ class OpenUtopiaFinanceApp:
         # Set initial theme
         self.apply_theme("#F5F7F8", "black")
 
+        # Shortcuts
+        self.bind_shortcuts()
+
     def setup_toolbar(self):
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
 
         # Icons Size
-        icon_size = (30, 30)  
+        icon_size = (30, 30) 
 
         open_icon = self.resize_icon("icons/folder.png", icon_size)
         home_icon = self.resize_icon("icons/home.png", icon_size)
@@ -80,6 +82,13 @@ class OpenUtopiaFinanceApp:
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
                       subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon]
+        
+    def bind_shortcuts(self):
+        """Binds keyboard shortcuts."""
+        self.root.bind("<Shift-X>", lambda event: self.edit_income())
+        self.root.bind("<Shift-G>", lambda event: self.toggle_grid())
+        self.root.bind("<Shift-T>", lambda event: self.change_theme())
+        self.root.bind("<Shift-S>", lambda event: self.save_graph())
 
     def setup_data_entry_form(self):
         """Sets up the data entry form for user input."""
@@ -196,12 +205,10 @@ class OpenUtopiaFinanceApp:
 
     def apply_theme(self, bg_color, fg_color):
         """Applies the selected theme to the app."""
-        # Set background and foreground color for the main window
         self.root.configure(bg=bg_color)
 
         # Update the colors for all widgets
         for widget in self.root.winfo_children():
-            # Apply background color
             widget.configure(bg=bg_color)
         
             # Apply foreground color if the widget supports it
