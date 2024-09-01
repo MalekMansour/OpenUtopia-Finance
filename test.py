@@ -44,12 +44,15 @@ class OpenUtopiaFinanceApp:
         # Set initial theme
         self.apply_theme("#F5F7F8", "black")
 
+        # Shortcuts
+        self.bind_shortcuts()
+
     def setup_toolbar(self):
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
 
         # Icons Size
-        icon_size = (30, 30)  
+        icon_size = (30, 30) 
 
         open_icon = self.resize_icon("icons/folder.png", icon_size)
         home_icon = self.resize_icon("icons/home.png", icon_size)
@@ -80,6 +83,10 @@ class OpenUtopiaFinanceApp:
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
                       subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon]
+        
+    def bind_shortcuts(self):
+        """Binds keyboard shortcuts."""
+        self.root.bind("<Shift-X>", lambda event: self.edit_income())
 
     def setup_data_entry_form(self):
         """Sets up the data entry form for user input."""
