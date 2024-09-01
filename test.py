@@ -183,9 +183,9 @@ class OpenUtopiaFinanceApp:
             "Dark": ("#1e1e1e", "blue", "dark"),
             "Blue": ("#001f3f", "black", "blue"),
             "Hacker": ("black", "#06D001", "hacker"),
+            "Orange": ("#E3651D", "black", "orange"),
             "Red": ("#B31312", "black", "red"),
             "Sakura": ("#FF8C9E", "black", "sakura"),
-            "Orange": ("#E3651D", "black", "orange"),
             "Acid": ("#392467", "black", "purple")
         }
         theme_names = ", ".join(themes.keys())
