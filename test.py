@@ -12,6 +12,9 @@ class OpenUtopiaFinanceApp:
         self.root = root
         self.root.title("OpenUtopia Finance")
 
+        # Default Grid Toggled OFF
+        self.grid_shown = False
+
         # Initialize income data
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
 
