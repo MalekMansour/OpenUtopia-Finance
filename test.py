@@ -199,10 +199,15 @@ class OpenUtopiaFinanceApp:
         """Applies the selected theme to the application."""
         self.root.configure(bg=bg)
         for widget in self.root.winfo_children():
-            widget.configure(bg=bg, fg=fg)
+            widget.configure(bg=bg)
+            # Only apply 'fg' if the widget supports it
+            if isinstance(widget, (tk.Label, tk.Button, tk.Entry, tk.Text, tk.Listbox)):
+                widget.configure(fg=fg)
             if isinstance(widget, tk.Frame):
                 for child in widget.winfo_children():
-                    child.configure(bg=bg, fg=fg)
+                    child.configure(bg=bg)
+                    if isinstance(child, (tk.Label, tk.Button, tk.Entry, tk.Text, tk.Listbox)):
+                        child.configure(fg=fg)
 
         plt.style.use(self.current_theme)
         self.update_graph()
