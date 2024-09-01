@@ -1,2 +1,3 @@
-# OpenUtopia-Finance
-A Finance Python Application for Graphs &amp; More
+# OpenUtopia Finance
+
+A Finance Graph Maker using Python
