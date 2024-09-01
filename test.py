@@ -60,7 +60,7 @@ class OpenUtopiaFinanceApp:
         edit_icon = self.resize_icon("icons/edit.png", icon_size)
         theme_icon = self.resize_icon("icons/theme.png", icon_size)
         save_icon = self.resize_icon("icons/save.png", icon_size)
-        grid_icon = self.resize_icon("icons/grid.png", icon_size)  # Add grid icon
+        grid_icon = self.resize_icon("icons/grid.png", icon_size)  # Grid button icon
 
         tk.Button(toolbar_frame, image=open_icon, command=self.open_file).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=home_icon, command=self.reset_view).pack(side=tk.LEFT, padx=2)
@@ -73,11 +73,11 @@ class OpenUtopiaFinanceApp:
         tk.Button(toolbar_frame, image=edit_icon, command=self.edit_income).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=theme_icon, command=self.change_theme).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=save_icon, command=self.save_graph).pack(side=tk.LEFT, padx=2)
-        tk.Button(toolbar_frame, image=grid_icon, command=self.toggle_grid).pack(side=tk.LEFT, padx=2)  # Add grid button
+        tk.Button(toolbar_frame, image=grid_icon, command=self.toggle_grid).pack(side=tk.LEFT, padx=2)  # Grid button
 
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
-                      subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon]  # Include grid icon
+                      subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon]
 
     def setup_data_entry_form(self):
         """Sets up the data entry form for user input."""
@@ -184,77 +184,71 @@ class OpenUtopiaFinanceApp:
             "Red": ("#B31312", "black", "red"),
             "Sakura": ("#FF8C9E", "black", "sakura"),
             "Orange": ("#E3651D", "black", "orange"),
-            "Acid": ("#392467", "black", "purple")
+            "Acid": ("#392467", "black", "acid"),
+            "Sky": ("#2EC4B6", "black", "sky")
         }
-        choice = simpledialog.askstring("Select Theme", f"Choose a theme: {', '.join(themes.keys())}")
-        if choice and choice in themes:
-            bg_color, fg_color, theme = themes[choice]
-            self.apply_theme(bg_color, fg_color)
-            self.current_theme = theme
+        choice = simpledialog.askstring("Change Theme", "Enter your choice (Default, Dark, Blue, Hacker, Red, Sakura, Orange, Acid, Sky):")
+        if choice:
+            theme = themes.get(choice.capitalize())
+            if theme:
+                self.apply_theme(*theme)
 
-    def apply_theme(self, bg_color, fg_color):
-        """Applies the selected theme to the application."""
+    def apply_theme(self, bg_color, fg_color, theme_name):
+        """Applies the selected theme."""
         self.root.configure(bg=bg_color)
         for widget in self.root.winfo_children():
             widget.configure(bg=bg_color, fg=fg_color)
+        self.current_theme = theme_name
+        self.update_graph()
 
     def save_graph(self):
-        """Saves the current graph as an image."""
+        """Saves the current graph as a PNG image."""
         filename = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG Files", "*.png"), ("All Files", "*.*")])
         if filename:
             self.figure.savefig(filename)
 
     def toggle_grid(self):
-        """Toggles the grid lines on the graph."""
+        """Toggles the grid on the graph."""
         self.grid_visible = not self.grid_visible
         self.ax.grid(self.grid_visible)
         self.canvas.draw()
 
     def add_income_data(self):
-        """Adds a new income data point based on user input."""
+        """Adds a new income data point."""
         try:
-            period = self.period_entry.get()
+            period = int(self.period_entry.get())
             amount = float(self.amount_entry.get())
-            new_row = pd.DataFrame({"Period": [period], "Amount": [amount]})
-            self.income_data = pd.concat([self.income_data, new_row], ignore_index=True)
+            self.income_data = self.income_data.append({"Period": period, "Amount": amount}, ignore_index=True)
             self.history.append(self.income_data.copy())
             self.history_index += 1
             self.update_graph()
         except ValueError:
-            messagebox.showerror("Invalid Input", "Please enter a valid number for the amount.")
+            messagebox.showerror("Error", "Please enter valid numerical values for Period and Amount.")
 
     def clear_income_data(self):
-        """Clears all the income data."""
-        if messagebox.askokcancel("Clear Data", "Are you sure you want to clear all data?"):
+        """Clears all income data."""
+        if messagebox.askyesno("Clear Data", "Are you sure you want to clear all data?"):
             self.income_data = pd.DataFrame(columns=["Period", "Amount"])
             self.history.append(self.income_data.copy())
             self.history_index += 1
             self.update_graph()
 
     def update_graph(self):
-        """Updates the graph based on the current income data."""
+        """Updates the graph based on current data and settings."""
         self.ax.clear()
+
         if self.graph_type == "line":
-            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], marker='o')
+            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], marker="o")
         elif self.graph_type == "bar":
             self.ax.bar(self.income_data["Period"], self.income_data["Amount"])
         elif self.graph_type == "candlestick":
-            # Example candlestick: open = amount-10, close = amount+10, low = amount-20, high = amount+20
-            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], marker='o')
-            for period, amount in zip(self.income_data["Period"], self.income_data["Amount"]):
-                open_price = amount - 10
-                close_price = amount + 10
-                low = amount - 20
-                high = amount + 20
-                self.ax.vlines(period, low, high, color="black")
-                self.ax.vlines(period, open_price, close_price, color="blue" if close_price > open_price else "red", linewidth=5)
+            pass  # Add candlestick plotting logic here if needed
+
         self.ax.set_title("Income Over Time")
         self.ax.set_xlabel("Period")
         self.ax.set_ylabel("Amount")
-        if self.grid_visible:
-            self.ax.grid(True)
+        self.ax.grid(self.grid_visible)
         self.canvas.draw()
-
 
 if __name__ == "__main__":
     root = tk.Tk()
