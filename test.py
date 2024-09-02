@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, simpledialog, messagebox
+from tkinter import filedialog, simpledialog, messagebox, Toplevel, Label, Button
 from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -42,6 +42,15 @@ class OpenUtopiaFinanceApp:
 
         # Set initial theme
         self.apply_theme("#F5F7F8", "black")
+
+         # Shortcuts storage
+        self.shortcuts = {
+            "edit_income": "<Shift-X>",
+            "toggle_grid": "<Shift-G>",
+            "change_theme": "<Shift-T>",
+            "enable_zoom": "<Shift-Z>",
+            "save_graph": "<Shift-S>"
+        }
 
         # Shortcuts
         self.bind_shortcuts()
