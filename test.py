@@ -93,6 +93,7 @@ class OpenUtopiaFinanceApp:
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
                       subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon]
+        
     def bind_shortcuts(self):
         """Binds keyboard shortcuts."""
         self.root.bind(self.shortcuts["edit_income"], lambda event: self.edit_income())
@@ -100,6 +101,11 @@ class OpenUtopiaFinanceApp:
         self.root.bind(self.shortcuts["change_theme"], lambda event: self.change_theme())
         self.root.bind(self.shortcuts["enable_zoom"], lambda event: self.enable_zoom())
         self.root.bind(self.shortcuts["save_graph"], lambda event: self.save_graph())
+
+    def unbind_shortcuts(self):
+        """Unbinds all current shortcuts."""
+        for shortcut in self.shortcuts.values():
+            self.root.unbind(shortcut)
 
     def edit_shortcuts(self):
         """Allows the user to modify keyboard shortcuts."""
@@ -134,21 +140,15 @@ class OpenUtopiaFinanceApp:
 
         def save_shortcuts():
             """Saves the user-defined shortcuts and rebinds them."""
+            self.unbind_shortcuts()  # Unbind all current shortcuts
+
             self.shortcuts["edit_income"] = edit_income_entry.get()
             self.shortcuts["toggle_grid"] = toggle_grid_entry.get()
             self.shortcuts["change_theme"] = change_theme_entry.get()
             self.shortcuts["enable_zoom"] = enable_zoom_entry.get()
             self.shortcuts["save_graph"] = save_graph_entry.get()
 
-            # Unbind all current shortcuts
-            self.root.unbind_all(self.shortcuts["edit_income"])
-            self.root.unbind_all(self.shortcuts["toggle_grid"])
-            self.root.unbind_all(self.shortcuts["change_theme"])
-            self.root.unbind_all(self.shortcuts["enable_zoom"])
-            self.root.unbind_all(self.shortcuts["save_graph"])
-
-            # Rebind new shortcuts
-            self.bind_shortcuts()
+            self.bind_shortcuts()  # Rebind new shortcuts
             shortcut_dialog.destroy()
 
         Button(shortcut_dialog, text="Save", command=save_shortcuts).grid(row=5, column=0, columnspan=2, pady=20)
