@@ -89,6 +89,7 @@ class OpenUtopiaFinanceApp:
         self.root.bind("<Shift-G>", lambda event: self.toggle_grid())
         self.root.bind("<Shift-T>", lambda event: self.change_theme())
         self.root.bind("<Shift-S>", lambda event: self.save_graph())
+        self.root.bind("<Shift-M>", lambda event: self.enable_move())
 
     def setup_data_entry_form(self):
         """Sets up the data entry form for user input."""
