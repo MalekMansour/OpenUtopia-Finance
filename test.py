@@ -44,7 +44,7 @@ class OpenUtopiaFinanceApp:
         self.apply_theme("#F5F7F8", "black")
 
          # Shortcuts storage
-        self.shortcuts = {
+        self.original_shortcuts = {
             "edit_income": "<Shift-X>",
             "toggle_grid": "<Shift-G>",
             "change_theme": "<Shift-T>",
@@ -55,7 +55,7 @@ class OpenUtopiaFinanceApp:
         # Shortcuts
         self.shortcuts = self.original_shortcuts.copy()
         self.bind_shortcuts()
-        
+
     def setup_toolbar(self):
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
@@ -112,7 +112,7 @@ class OpenUtopiaFinanceApp:
         """Allows the user to modify keyboard shortcuts."""
         shortcut_dialog = Toplevel(self.root)
         shortcut_dialog.title("Edit Shortcuts")
-        shortcut_dialog.geometry("300x200")
+        shortcut_dialog.geometry("300x220")
 
         Label(shortcut_dialog, text="Edit Income:").grid(row=0, column=0, padx=10, pady=10)
         edit_income_entry = tk.Entry(shortcut_dialog)
@@ -152,7 +152,27 @@ class OpenUtopiaFinanceApp:
             self.bind_shortcuts()  # Rebind new shortcuts
             shortcut_dialog.destroy()
 
-        Button(shortcut_dialog, text="Save", command=save_shortcuts).grid(row=5, column=0, columnspan=2, pady=20)
+        def reset_shortcuts():
+            """Resets shortcuts to their original values and rebinds them."""
+            self.unbind_shortcuts()  # Unbind all current shortcuts
+
+            self.shortcuts = self.original_shortcuts.copy()  # Reset to original
+            self.bind_shortcuts()  # Rebind original shortcuts
+
+            # Update the entries in the dialog to reflect the reset shortcuts
+            edit_income_entry.delete(0, tk.END)
+            edit_income_entry.insert(0, self.shortcuts["edit_income"])
+            toggle_grid_entry.delete(0, tk.END)
+            toggle_grid_entry.insert(0, self.shortcuts["toggle_grid"])
+            change_theme_entry.delete(0, tk.END)
+            change_theme_entry.insert(0, self.shortcuts["change_theme"])
+            enable_zoom_entry.delete(0, tk.END)
+            enable_zoom_entry.insert(0, self.shortcuts["enable_zoom"])
+            save_graph_entry.delete(0, tk.END)
+            save_graph_entry.insert(0, self.shortcuts["save_graph"])
+
+        Button(shortcut_dialog, text="Save", command=save_shortcuts).grid(row=5, column=0, padx=10, pady=20)
+        Button(shortcut_dialog, text="Reset", command=reset_shortcuts).grid(row=5, column=1, padx=10, pady=20)
 
     def setup_data_entry_form(self):
         """Sets up the data entry form for user input."""
