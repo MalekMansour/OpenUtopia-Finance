@@ -64,8 +64,8 @@ class OpenUtopiaFinanceApp:
         graph_icon = self.resize_icon("icons/graph.png", icon_size)
         edit_icon = self.resize_icon("icons/edit.png", icon_size)
         theme_icon = self.resize_icon("icons/theme.png", icon_size)
-        save_icon = self.resize_icon("icons/save.png", icon_size)
         shortcuts_icon = self.resize_icon("icons/shortcuts.png", icon_size)
+        save_icon = self.resize_icon("icons/save.png", icon_size)
 
         tk.Button(toolbar_frame, image=open_icon, command=self.open_file).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=home_icon, command=self.reset_view).pack(side=tk.LEFT, padx=2)
