@@ -53,8 +53,9 @@ class OpenUtopiaFinanceApp:
         }
 
         # Shortcuts
+        self.shortcuts = self.original_shortcuts.copy()
         self.bind_shortcuts()
-
+        
     def setup_toolbar(self):
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
