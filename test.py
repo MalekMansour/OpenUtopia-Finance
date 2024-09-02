@@ -78,6 +78,8 @@ class OpenUtopiaFinanceApp:
         tk.Button(toolbar_frame, image=edit_icon, command=self.edit_income).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=theme_icon, command=self.change_theme).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=save_icon, command=self.save_graph).pack(side=tk.LEFT, padx=2)
+        tk.Button(toolbar_frame, image=shortcuts_icon, command=self.show_shortcuts).pack(side=tk.LEFT, padx=2) 
+
 
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
