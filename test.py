@@ -85,7 +85,29 @@ class OpenUtopiaFinanceApp:
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
                       subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon]
-        
+    def show_shortcuts(self):
+        """Displays the current shortcuts and allows the user to change them."""
+        shortcuts_window = tk.Toplevel(self.root)
+        shortcuts_window.title("Keyboard Shortcuts")
+        shortcuts_window.geometry("400x300")
+
+        shortcuts = {
+            "Edit Income": "Shift+X",
+            "Toggle Grid": "Shift+G",
+            "Change Theme": "Shift+T",
+            "Zoom": "Shift+Z",
+            "Save Graph": "Shift+S"
+        }
+
+        # Display current shortcuts
+        tk.Label(shortcuts_window, text="Current Keyboard Shortcuts", font=("Arial", 14)).pack(pady=10)
+        for action, shortcut in shortcuts.items():
+            tk.Label(shortcuts_window, text=f"{action}: {shortcut}").pack(anchor="w", padx=10)
+
+        # Add a button to close the window
+        close_button = tk.Button(shortcuts_window, text="Close", command=shortcuts_window.destroy)
+        close_button.pack(pady=20)
+            
     def bind_shortcuts(self):
         """Binds keyboard shortcuts."""
         self.root.bind("<Shift-X>", lambda event: self.edit_income())
