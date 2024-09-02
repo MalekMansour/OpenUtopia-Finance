@@ -78,9 +78,8 @@ class OpenUtopiaFinanceApp:
         tk.Button(toolbar_frame, image=graph_icon, command=self.edit_graph_type).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=edit_icon, command=self.edit_income).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=theme_icon, command=self.change_theme).pack(side=tk.LEFT, padx=2)
-        tk.Button(toolbar_frame, image=save_icon, command=self.save_graph).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=shortcuts_icon, command=self.show_shortcuts).pack(side=tk.LEFT, padx=2) 
-
+        tk.Button(toolbar_frame, image=save_icon, command=self.save_graph).pack(side=tk.LEFT, padx=2)
 
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
@@ -107,7 +106,7 @@ class OpenUtopiaFinanceApp:
         # Add a button to close the window
         close_button = tk.Button(shortcuts_window, text="Close", command=shortcuts_window.destroy)
         close_button.pack(pady=20)
-            
+
     def bind_shortcuts(self):
         """Binds keyboard shortcuts."""
         self.root.bind("<Shift-X>", lambda event: self.edit_income())
