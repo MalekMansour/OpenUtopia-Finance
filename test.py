@@ -159,8 +159,8 @@ class OpenUtopiaFinanceApp:
             """Resets shortcuts to their original values and rebinds them."""
             self.unbind_shortcuts()  # Unbind all current shortcuts
 
-            self.shortcuts = self.original_shortcuts.copy()  # Reset to original
-            self.bind_shortcuts()  # Rebind original shortcuts
+            self.shortcuts = self.original_shortcuts.copy()  
+            self.bind_shortcuts()  
 
             # Update the entries in the dialog to reflect the reset shortcuts
             edit_income_entry.delete(0, tk.END)
@@ -182,7 +182,7 @@ class OpenUtopiaFinanceApp:
         resize_dialog = tk.Toplevel()
         resize_dialog.title("Resize Graph")
 
-        # Example of creating sliders for resizing
+        # Sliders for resizing
         left_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Left Margin")
         left_slider.pack()
         left_slider.set(self.current_margins["left"])
@@ -202,6 +202,10 @@ class OpenUtopiaFinanceApp:
         bottom_slider.pack()
         bottom_slider.set(self.current_margins["bottom"])
         bottom_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(None, None, None, bottom_slider.get()))
+
+        # Reset button
+        reset_button = tk.Button(resize_dialog, text="Reset", command=lambda: self.reset_margins(left_slider, right_slider, top_slider, bottom_slider))
+        reset_button.pack(side=tk.BOTTOM, padx=10, pady=20)
 
     def update_graph_with_sliders(self, left=None, right=None, top=None, bottom=None):
         """Updates the graph with the current slider values in real-time."""
@@ -225,6 +229,19 @@ class OpenUtopiaFinanceApp:
             self.current_margins["top"] - self.current_margins["bottom"]
         ])
         self.canvas.draw()
+
+    def reset_margins(self, left_slider, right_slider, top_slider, bottom_slider):
+        """Resets margins to their original values and updates sliders."""
+        self.current_margins = self.default_margins.copy()
+        
+        # Update sliders to reflect default margins
+        left_slider.set(self.default_margins["left"])
+        right_slider.set(self.default_margins["right"])
+        top_slider.set(self.default_margins["top"])
+        bottom_slider.set(self.default_margins["bottom"])
+        
+        # Update the graph with default margins
+        self.update_graph_with_margins()
 
         def setup_data_entry_form(self):
             """Sets up the data entry form for user input."""
