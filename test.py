@@ -20,9 +20,6 @@ class OpenUtopiaFinanceApp:
         # Set up toolbar
         self.setup_toolbar()
 
-        # Set up data entry form
-        # self.setup_data_entry_form()
-
         # Set up matplotlib figure
         self.figure, self.ax = plt.subplots()
         self.canvas = FigureCanvasTkAgg(self.figure, master=root)
@@ -181,46 +178,46 @@ class OpenUtopiaFinanceApp:
         Button(shortcut_dialog, text="Reset", command=reset_shortcuts).grid(row=5, column=1, padx=10, pady=20)
 
     def resize_graph(self):
-        """Method to handle resizing the graph."""
-        # Logic for resizing the graph, e.g., opening a resize dialog
+        """Method to handle resizing the graph in real-time."""
         resize_dialog = tk.Toplevel()
         resize_dialog.title("Resize Graph")
 
         # Example of creating sliders for resizing
         left_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Left Margin")
         left_slider.pack()
+        left_slider.set(self.current_margins["left"])
+        left_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(left_slider.get(), None, None, None))
+
         right_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Right Margin")
         right_slider.pack()
+        right_slider.set(self.current_margins["right"])
+        right_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(None, right_slider.get(), None, None))
+
         top_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Top Margin")
         top_slider.pack()
+        top_slider.set(self.current_margins["top"])
+        top_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(None, None, top_slider.get(), None))
+
         bottom_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Bottom Margin")
         bottom_slider.pack()
+        bottom_slider.set(self.current_margins["bottom"])
+        bottom_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(None, None, None, bottom_slider.get()))
 
-        # Buttons to save or reset the margins
-        def save_margins():
-            """Saves the current margins and updates the graph."""
-            self.current_margins = {
-                "left": left_slider.get(),
-                "right": right_slider.get(),
-                "top": top_slider.get(),
-                "bottom": bottom_slider.get()
-            }
-            self.update_graph_with_margins()
-            resize_dialog.destroy()
-
-        def reset_margins():
-            """Resets margins to their original values."""
-            self.current_margins = self.default_margins.copy()
-            left_slider.set(self.default_margins["left"])
-            right_slider.set(self.default_margins["right"])
-            top_slider.set(self.default_margins["top"])
-            bottom_slider.set(self.default_margins["bottom"])
-
-        tk.Button(resize_dialog, text="Save", command=save_margins).pack(side=tk.LEFT, padx=10, pady=20)
-        tk.Button(resize_dialog, text="Reset", command=reset_margins).pack(side=tk.RIGHT, padx=10, pady=20)
+    def update_graph_with_sliders(self, left=None, right=None, top=None, bottom=None):
+        """Updates the graph with the current slider values in real-time."""
+        if left is not None:
+            self.current_margins["left"] = left
+        if right is not None:
+            self.current_margins["right"] = right
+        if top is not None:
+            self.current_margins["top"] = top
+        if bottom is not None:
+            self.current_margins["bottom"] = bottom
+        
+        self.update_graph_with_margins()
 
     def update_graph_with_margins(self):
-        """Updates the graph with the current margins."""
+        """Applies the current margins to the graph."""
         self.ax.set_position([
             self.current_margins["left"], 
             self.current_margins["bottom"], 
