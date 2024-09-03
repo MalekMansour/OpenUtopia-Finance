@@ -112,7 +112,7 @@ class OpenUtopiaFinanceApp:
         """Allows the user to modify keyboard shortcuts."""
         shortcut_dialog = Toplevel(self.root)
         shortcut_dialog.title("Edit Shortcuts")
-        shortcut_dialog.geometry("300x220")
+        shortcut_dialog.geometry("300x300")
 
         Label(shortcut_dialog, text="Edit Income:").grid(row=0, column=0, padx=10, pady=10)
         edit_income_entry = tk.Entry(shortcut_dialog)
