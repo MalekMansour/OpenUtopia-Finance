@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, simpledialog, messagebox, Toplevel, Label, Button
+from tkinter import filedialog, simpledialog, messagebox, Toplevel, Label, Button, Scale, HORIZONTAL
 from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -75,9 +75,9 @@ class OpenUtopiaFinanceApp:
         zoom_icon = self.resize_icon("icons/zoom.png", icon_size)
         grid_icon = self.resize_icon("icons/grid.png", icon_size)
         subplot_icon = self.resize_icon("icons/subplot.png", icon_size)
-        resize_icon = self.resize_icon("icons/resize.png", icon_size)
+        resize_icon = self.resize_icon("icons/edit.png", icon_size)
         graph_icon = self.resize_icon("icons/graph.png", icon_size)
-        edit_icon = self.resize_icon("icons/edit.png", icon_size)
+        edit_icon = self.resize_icon("icons/add.png", icon_size)
         theme_icon = self.resize_icon("icons/theme.png", icon_size)
         shortcuts_icon = self.resize_icon("icons/shortcuts.png", icon_size)
         save_icon = self.resize_icon("icons/save.png", icon_size)
@@ -180,27 +180,78 @@ class OpenUtopiaFinanceApp:
         Button(shortcut_dialog, text="Save", command=save_shortcuts).grid(row=5, column=0, padx=10, pady=20)
         Button(shortcut_dialog, text="Reset", command=reset_shortcuts).grid(row=5, column=1, padx=10, pady=20)
 
-    def setup_data_entry_form(self):
-        """Sets up the data entry form for user input."""
-        entry_frame = tk.Frame(self.root)
-        entry_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
+    class GraphApp:
+        def __init__(self, master):
+            self.master = master
+            self.default_margins = {"left": 0.1, "right": 0.9, "top": 0.9, "bottom": 0.1}
+            self.current_margins = self.default_margins.copy()
 
-        tk.Label(entry_frame, text="Period:").grid(row=0, column=0, padx=5, pady=5)
-        self.period_entry = tk.Entry(entry_frame)
-        self.period_entry.grid(row=0, column=1, padx=5, pady=5)
+            self.left_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
+            self.right_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
+            self.top_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
+            self.bottom_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
 
-        tk.Label(entry_frame, text="Amount:").grid(row=0, column=2, padx=5, pady=5)
-        self.amount_entry = tk.Entry(entry_frame)
-        self.amount_entry.grid(row=0, column=3, padx=5, pady=5)
+            self.left_slider.pack()
+            self.right_slider.pack()
+            self.top_slider.pack()
+            self.bottom_slider.pack()
 
-        add_button = tk.Button(entry_frame, text="Add Data", command=self.add_income_data)
-        add_button.grid(row=0, column=4, padx=5, pady=5)
+            self.create_resize_dialog()
 
-        clear_button = tk.Button(entry_frame, text="Clear Data", command=self.clear_income_data)
-        clear_button.grid(row=0, column=5, padx=5, pady=5)
+        def create_resize_dialog(self):
+            resize_dialog = tk.Toplevel(self.master)
 
-        update_button = tk.Button(entry_frame, text="Update Graph", command=self.update_graph)
-        update_button.grid(row=0, column=6, padx=5, pady=5)
+        def save_margins():
+            """Saves the current margins and updates the graph."""
+            self.current_margins = {
+                "left": self.left_slider.get(),
+                "right": self.right_slider.get(),
+                "top": self.top_slider.get(),
+                "bottom": self.bottom_slider.get()
+            }
+            self.update_graph_with_margins()
+            resize_dialog.destroy()
+
+        def reset_margins():
+            """Resets margins to their original values."""
+            self.current_margins = self.default_margins.copy()
+            self.left_slider.set(self.default_margins["left"])
+            self.right_slider.set(self.default_margins["right"])
+            self.top_slider.set(self.default_margins["top"])
+            self.bottom_slider.set(self.default_margins["bottom"])
+
+        Button(resize_dialog, text="Save", command=save_margins).pack(side=tk.LEFT, padx=10, pady=20)
+        Button(resize_dialog, text="Reset", command=reset_margins).pack(side=tk.RIGHT, padx=10, pady=20)
+
+    def update_graph_with_margins(self):
+        """Updates the graph with the current margins."""
+        # Assuming `self.ax` is a matplotlib Axes instance and `self.canvas` is a FigureCanvasTkAgg
+        self.ax.set_position([self.current_margins["left"], self.current_margins["bottom"], 
+                              self.current_margins["right"] - self.current_margins["left"], 
+                              self.current_margins["top"] - self.current_margins["bottom"]])
+        self.canvas.draw()
+
+        def setup_data_entry_form(self):
+            """Sets up the data entry form for user input."""
+            entry_frame = tk.Frame(self.root)
+            entry_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
+
+            tk.Label(entry_frame, text="Period:").grid(row=0, column=0, padx=5, pady=5)
+            self.period_entry = tk.Entry(entry_frame)
+            self.period_entry.grid(row=0, column=1, padx=5, pady=5)
+
+            tk.Label(entry_frame, text="Amount:").grid(row=0, column=2, padx=5, pady=5)
+            self.amount_entry = tk.Entry(entry_frame)
+            self.amount_entry.grid(row=0, column=3, padx=5, pady=5)
+
+            add_button = tk.Button(entry_frame, text="Add Data", command=self.add_income_data)
+            add_button.grid(row=0, column=4, padx=5, pady=5)
+
+            clear_button = tk.Button(entry_frame, text="Clear Data", command=self.clear_income_data)
+            clear_button.grid(row=0, column=5, padx=5, pady=5)
+
+            update_button = tk.Button(entry_frame, text="Update Graph", command=self.update_graph)
+            update_button.grid(row=0, column=6, padx=5, pady=5)
 
     def resize_icon(self, image_path, size):
         """Resizes an icon to the specified size and returns a PhotoImage."""
