@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, simpledialog, messagebox
+from tkinter import filedialog, simpledialog, messagebox, Toplevel, Label, Button
 from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -43,7 +43,17 @@ class OpenUtopiaFinanceApp:
         # Set initial theme
         self.apply_theme("#F5F7F8", "black")
 
+         # Shortcuts storage
+        self.original_shortcuts = {
+            "edit_income": "<Shift-X>",
+            "toggle_grid": "<Shift-G>",
+            "change_theme": "<Shift-T>",
+            "enable_zoom": "<Shift-Z>",
+            "save_graph": "<Shift-S>"
+        }
+
         # Shortcuts
+        self.shortcuts = self.original_shortcuts.copy()
         self.bind_shortcuts()
 
     def setup_toolbar(self):
@@ -78,42 +88,91 @@ class OpenUtopiaFinanceApp:
         tk.Button(toolbar_frame, image=graph_icon, command=self.edit_graph_type).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=edit_icon, command=self.edit_income).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=theme_icon, command=self.change_theme).pack(side=tk.LEFT, padx=2)
-        tk.Button(toolbar_frame, image=shortcuts_icon, command=self.show_shortcuts).pack(side=tk.LEFT, padx=2) 
+        tk.Button(toolbar_frame, image=shortcuts_icon, command=self.edit_shortcuts).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=save_icon, command=self.save_graph).pack(side=tk.LEFT, padx=2)
 
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
                       subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon]
-    def show_shortcuts(self):
-        """Displays the current shortcuts and allows the user to change them."""
-        shortcuts_window = tk.Toplevel(self.root)
-        shortcuts_window.title("Keyboard Shortcuts")
-        shortcuts_window.geometry("400x300")
-
-        shortcuts = {
-            "Edit Income": "Shift+X",
-            "Toggle Grid": "Shift+G",
-            "Change Theme": "Shift+T",
-            "Zoom": "Shift+Z",
-            "Save Graph": "Shift+S"
-        }
-
-        # Display current shortcuts
-        tk.Label(shortcuts_window, text="Current Keyboard Shortcuts", font=("Arial", 14)).pack(pady=10)
-        for action, shortcut in shortcuts.items():
-            tk.Label(shortcuts_window, text=f"{action}: {shortcut}").pack(anchor="w", padx=10)
-
-        # Add a button to close the window
-        close_button = tk.Button(shortcuts_window, text="Close", command=shortcuts_window.destroy)
-        close_button.pack(pady=20)
-
+        
     def bind_shortcuts(self):
         """Binds keyboard shortcuts."""
-        self.root.bind("<Shift-X>", lambda event: self.edit_income())
-        self.root.bind("<Shift-G>", lambda event: self.toggle_grid())
-        self.root.bind("<Shift-T>", lambda event: self.change_theme())
-        self.root.bind("<Shift-Z>", lambda event: self.enable_zoom())
-        self.root.bind("<Shift-S>", lambda event: self.save_graph())
+        self.root.bind(self.shortcuts["edit_income"], lambda event: self.edit_income())
+        self.root.bind(self.shortcuts["toggle_grid"], lambda event: self.toggle_grid())
+        self.root.bind(self.shortcuts["change_theme"], lambda event: self.change_theme())
+        self.root.bind(self.shortcuts["enable_zoom"], lambda event: self.enable_zoom())
+        self.root.bind(self.shortcuts["save_graph"], lambda event: self.save_graph())
+
+    def unbind_shortcuts(self):
+        """Unbinds all current shortcuts."""
+        for shortcut in self.shortcuts.values():
+            self.root.unbind(shortcut)
+
+    def edit_shortcuts(self):
+        """Allows the user to modify keyboard shortcuts."""
+        shortcut_dialog = Toplevel(self.root)
+        shortcut_dialog.title("Edit Shortcuts")
+        shortcut_dialog.geometry("300x220")
+
+        Label(shortcut_dialog, text="Edit Income:").grid(row=0, column=0, padx=10, pady=10)
+        edit_income_entry = tk.Entry(shortcut_dialog)
+        edit_income_entry.insert(0, self.shortcuts["edit_income"])
+        edit_income_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        Label(shortcut_dialog, text="Toggle Grid:").grid(row=1, column=0, padx=10, pady=10)
+        toggle_grid_entry = tk.Entry(shortcut_dialog)
+        toggle_grid_entry.insert(0, self.shortcuts["toggle_grid"])
+        toggle_grid_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        Label(shortcut_dialog, text="Change Theme:").grid(row=2, column=0, padx=10, pady=10)
+        change_theme_entry = tk.Entry(shortcut_dialog)
+        change_theme_entry.insert(0, self.shortcuts["change_theme"])
+        change_theme_entry.grid(row=2, column=1, padx=10, pady=10)
+
+        Label(shortcut_dialog, text="Enable Zoom:").grid(row=3, column=0, padx=10, pady=10)
+        enable_zoom_entry = tk.Entry(shortcut_dialog)
+        enable_zoom_entry.insert(0, self.shortcuts["enable_zoom"])
+        enable_zoom_entry.grid(row=3, column=1, padx=10, pady=10)
+
+        Label(shortcut_dialog, text="Save Graph:").grid(row=4, column=0, padx=10, pady=10)
+        save_graph_entry = tk.Entry(shortcut_dialog)
+        save_graph_entry.insert(0, self.shortcuts["save_graph"])
+        save_graph_entry.grid(row=4, column=1, padx=10, pady=10)
+
+        def save_shortcuts():
+            """Saves the user-defined shortcuts and rebinds them."""
+            self.unbind_shortcuts()  # Unbind all current shortcuts
+
+            self.shortcuts["edit_income"] = edit_income_entry.get()
+            self.shortcuts["toggle_grid"] = toggle_grid_entry.get()
+            self.shortcuts["change_theme"] = change_theme_entry.get()
+            self.shortcuts["enable_zoom"] = enable_zoom_entry.get()
+            self.shortcuts["save_graph"] = save_graph_entry.get()
+
+            self.bind_shortcuts()  # Rebind new shortcuts
+            shortcut_dialog.destroy()
+
+        def reset_shortcuts():
+            """Resets shortcuts to their original values and rebinds them."""
+            self.unbind_shortcuts()  # Unbind all current shortcuts
+
+            self.shortcuts = self.original_shortcuts.copy()  # Reset to original
+            self.bind_shortcuts()  # Rebind original shortcuts
+
+            # Update the entries in the dialog to reflect the reset shortcuts
+            edit_income_entry.delete(0, tk.END)
+            edit_income_entry.insert(0, self.shortcuts["edit_income"])
+            toggle_grid_entry.delete(0, tk.END)
+            toggle_grid_entry.insert(0, self.shortcuts["toggle_grid"])
+            change_theme_entry.delete(0, tk.END)
+            change_theme_entry.insert(0, self.shortcuts["change_theme"])
+            enable_zoom_entry.delete(0, tk.END)
+            enable_zoom_entry.insert(0, self.shortcuts["enable_zoom"])
+            save_graph_entry.delete(0, tk.END)
+            save_graph_entry.insert(0, self.shortcuts["save_graph"])
+
+        Button(shortcut_dialog, text="Save", command=save_shortcuts).grid(row=5, column=0, padx=10, pady=20)
+        Button(shortcut_dialog, text="Reset", command=reset_shortcuts).grid(row=5, column=1, padx=10, pady=20)
 
     def setup_data_entry_form(self):
         """Sets up the data entry form for user input."""
