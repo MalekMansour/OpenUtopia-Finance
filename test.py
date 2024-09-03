@@ -181,25 +181,25 @@ class OpenUtopiaFinanceApp:
         Button(shortcut_dialog, text="Reset", command=reset_shortcuts).grid(row=5, column=1, padx=10, pady=20)
 
     class GraphApp:
-        def __init__(self, master):
-            self.master = master
-            self.default_margins = {"left": 0.1, "right": 0.9, "top": 0.9, "bottom": 0.1}
-            self.current_margins = self.default_margins.copy()
+      def __init__(self, master):
+        self.master = master
+        self.default_margins = {"left": 0.1, "right": 0.9, "top": 0.9, "bottom": 0.1}
+        self.current_margins = self.default_margins.copy()
 
-            self.left_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
-            self.right_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
-            self.top_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
-            self.bottom_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
+        self.left_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
+        self.right_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
+        self.top_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
+        self.bottom_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
 
-            self.left_slider.pack()
-            self.right_slider.pack()
-            self.top_slider.pack()
-            self.bottom_slider.pack()
+        self.left_slider.pack()
+        self.right_slider.pack()
+        self.top_slider.pack()
+        self.bottom_slider.pack()
 
-            self.create_resize_dialog()
+        self.create_resize_dialog()
 
-        def create_resize_dialog(self):
-            resize_dialog = tk.Toplevel(self.master)
+    def create_resize_dialog(self):
+        resize_dialog = tk.Toplevel(self.master)
 
         def save_margins():
             """Saves the current margins and updates the graph."""
