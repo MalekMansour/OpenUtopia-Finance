@@ -21,7 +21,7 @@ class OpenUtopiaFinanceApp:
         self.setup_toolbar()
 
         # Set up data entry form
-        self.setup_data_entry_form()
+        # self.setup_data_entry_form()
 
         # Set up matplotlib figure
         self.figure, self.ax = plt.subplots()
@@ -180,34 +180,30 @@ class OpenUtopiaFinanceApp:
         Button(shortcut_dialog, text="Save", command=save_shortcuts).grid(row=5, column=0, padx=10, pady=20)
         Button(shortcut_dialog, text="Reset", command=reset_shortcuts).grid(row=5, column=1, padx=10, pady=20)
 
-    class GraphApp:
-      def __init__(self, master):
-        self.master = master
-        self.default_margins = {"left": 0.1, "right": 0.9, "top": 0.9, "bottom": 0.1}
-        self.current_margins = self.default_margins.copy()
+    def resize_graph(self):
+        """Method to handle resizing the graph."""
+        # Logic for resizing the graph, e.g., opening a resize dialog
+        resize_dialog = tk.Toplevel()
+        resize_dialog.title("Resize Graph")
 
-        self.left_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
-        self.right_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
-        self.top_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
-        self.bottom_slider = tk.Scale(master, from_=0, to=1, orient=tk.HORIZONTAL)
+        # Example of creating sliders for resizing
+        left_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Left Margin")
+        left_slider.pack()
+        right_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Right Margin")
+        right_slider.pack()
+        top_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Top Margin")
+        top_slider.pack()
+        bottom_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Bottom Margin")
+        bottom_slider.pack()
 
-        self.left_slider.pack()
-        self.right_slider.pack()
-        self.top_slider.pack()
-        self.bottom_slider.pack()
-
-        self.create_resize_dialog()
-
-    def create_resize_dialog(self):
-        resize_dialog = tk.Toplevel(self.master)
-
+        # Buttons to save or reset the margins
         def save_margins():
             """Saves the current margins and updates the graph."""
             self.current_margins = {
-                "left": self.left_slider.get(),
-                "right": self.right_slider.get(),
-                "top": self.top_slider.get(),
-                "bottom": self.bottom_slider.get()
+                "left": left_slider.get(),
+                "right": right_slider.get(),
+                "top": top_slider.get(),
+                "bottom": bottom_slider.get()
             }
             self.update_graph_with_margins()
             resize_dialog.destroy()
@@ -215,20 +211,22 @@ class OpenUtopiaFinanceApp:
         def reset_margins():
             """Resets margins to their original values."""
             self.current_margins = self.default_margins.copy()
-            self.left_slider.set(self.default_margins["left"])
-            self.right_slider.set(self.default_margins["right"])
-            self.top_slider.set(self.default_margins["top"])
-            self.bottom_slider.set(self.default_margins["bottom"])
+            left_slider.set(self.default_margins["left"])
+            right_slider.set(self.default_margins["right"])
+            top_slider.set(self.default_margins["top"])
+            bottom_slider.set(self.default_margins["bottom"])
 
-        Button(resize_dialog, text="Save", command=save_margins).pack(side=tk.LEFT, padx=10, pady=20)
-        Button(resize_dialog, text="Reset", command=reset_margins).pack(side=tk.RIGHT, padx=10, pady=20)
+        tk.Button(resize_dialog, text="Save", command=save_margins).pack(side=tk.LEFT, padx=10, pady=20)
+        tk.Button(resize_dialog, text="Reset", command=reset_margins).pack(side=tk.RIGHT, padx=10, pady=20)
 
     def update_graph_with_margins(self):
         """Updates the graph with the current margins."""
-        # Assuming `self.ax` is a matplotlib Axes instance and `self.canvas` is a FigureCanvasTkAgg
-        self.ax.set_position([self.current_margins["left"], self.current_margins["bottom"], 
-                              self.current_margins["right"] - self.current_margins["left"], 
-                              self.current_margins["top"] - self.current_margins["bottom"]])
+        self.ax.set_position([
+            self.current_margins["left"], 
+            self.current_margins["bottom"], 
+            self.current_margins["right"] - self.current_margins["left"], 
+            self.current_margins["top"] - self.current_margins["bottom"]
+        ])
         self.canvas.draw()
 
         def setup_data_entry_form(self):
