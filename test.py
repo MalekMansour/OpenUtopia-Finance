@@ -71,6 +71,7 @@ class OpenUtopiaFinanceApp:
         zoom_icon = self.resize_icon("icons/zoom.png", icon_size)
         grid_icon = self.resize_icon("icons/grid.png", icon_size)
         subplot_icon = self.resize_icon("icons/subplot.png", icon_size)
+        resize_icon = self.resize_icon("icons/resize.png", icon_size)
         graph_icon = self.resize_icon("icons/graph.png", icon_size)
         edit_icon = self.resize_icon("icons/edit.png", icon_size)
         theme_icon = self.resize_icon("icons/theme.png", icon_size)
