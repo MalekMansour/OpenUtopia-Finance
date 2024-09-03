@@ -56,6 +56,10 @@ class OpenUtopiaFinanceApp:
         self.shortcuts = self.original_shortcuts.copy()
         self.bind_shortcuts()
 
+        # Default margins for the graph
+        self.default_margins = {"left": 0.1, "right": 0.9, "top": 0.9, "bottom": 0.1}
+        self.current_margins = self.default_margins.copy()
+
     def setup_toolbar(self):
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
