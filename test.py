@@ -152,7 +152,7 @@ class OpenUtopiaFinanceApp:
             self.shortcuts["enable_zoom"] = enable_zoom_entry.get()
             self.shortcuts["save_graph"] = save_graph_entry.get()
 
-            self.bind_shortcuts()  # Rebind new shortcuts
+            self.bind_shortcuts()  
             shortcut_dialog.destroy()
 
         def reset_shortcuts():
