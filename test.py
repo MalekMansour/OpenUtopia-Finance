@@ -239,8 +239,6 @@ class OpenUtopiaFinanceApp:
         right_slider.set(self.default_margins["right"])
         top_slider.set(self.default_margins["top"])
         bottom_slider.set(self.default_margins["bottom"])
-        
-        # Update the graph with default margins
         self.update_graph_with_margins()
 
         def setup_data_entry_form(self):
