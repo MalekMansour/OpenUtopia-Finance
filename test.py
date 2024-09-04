@@ -75,6 +75,7 @@ class OpenUtopiaFinanceApp:
         resize_icon = self.resize_icon("icons/edit.png", icon_size)
         graph_icon = self.resize_icon("icons/graph.png", icon_size)
         edit_icon = self.resize_icon("icons/add.png", icon_size)
+        clear_icon = self.resize_icon("icons/clear.png", icon_size)
         theme_icon = self.resize_icon("icons/theme.png", icon_size)
         shortcuts_icon = self.resize_icon("icons/shortcuts.png", icon_size)
         save_icon = self.resize_icon("icons/save.png", icon_size)
@@ -90,13 +91,14 @@ class OpenUtopiaFinanceApp:
         tk.Button(toolbar_frame, image=resize_icon, command=self.resize_graph).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=graph_icon, command=self.edit_graph_type).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=edit_icon, command=self.edit_income).pack(side=tk.LEFT, padx=2)
+        tk.Button(toolbar_frame, image=clear_icon, command=self.clear_graph).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=theme_icon, command=self.change_theme).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=shortcuts_icon, command=self.edit_shortcuts).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=save_icon, command=self.save_graph).pack(side=tk.LEFT, padx=2)
 
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
-                subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon, resize_icon]
+                subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon, resize_icon, clear_icon]
         
     def bind_shortcuts(self):
         """Binds keyboard shortcuts."""
@@ -176,6 +178,14 @@ class OpenUtopiaFinanceApp:
 
         Button(shortcut_dialog, text="Save", command=save_shortcuts).grid(row=5, column=0, padx=10, pady=20)
         Button(shortcut_dialog, text="Reset", command=reset_shortcuts).grid(row=5, column=1, padx=10, pady=20)
+
+    def clear_graph(self):
+        """Clears the current graph."""
+        if hasattr(self, 'ax') and hasattr(self, 'canvas'):
+            self.ax.clear()  # Clear the axes
+            self.canvas.draw()  # Refresh the canvas
+        else:
+            print("Error: 'ax' or 'canvas' not initialized correctly.")
 
     def resize_graph(self):
         """Method to handle resizing the graph in real-time."""
