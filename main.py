@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, simpledialog, messagebox, Toplevel, Label, Button
+from tkinter import filedialog, simpledialog, messagebox, Toplevel, Label, Button, Scale, HORIZONTAL
 from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -19,9 +19,6 @@ class OpenUtopiaFinanceApp:
 
         # Set up toolbar
         self.setup_toolbar()
-
-        # Set up data entry form
-        self.setup_data_entry_form()
 
         # Set up matplotlib figure
         self.figure, self.ax = plt.subplots()
@@ -56,6 +53,10 @@ class OpenUtopiaFinanceApp:
         self.shortcuts = self.original_shortcuts.copy()
         self.bind_shortcuts()
 
+        # Default margins for the graph
+        self.default_margins = {"left": 0.1, "right": 0.9, "top": 0.9, "bottom": 0.1}
+        self.current_margins = self.default_margins.copy()
+
     def setup_toolbar(self):
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
@@ -71,8 +72,9 @@ class OpenUtopiaFinanceApp:
         zoom_icon = self.resize_icon("icons/zoom.png", icon_size)
         grid_icon = self.resize_icon("icons/grid.png", icon_size)
         subplot_icon = self.resize_icon("icons/subplot.png", icon_size)
+        resize_icon = self.resize_icon("icons/edit.png", icon_size)
         graph_icon = self.resize_icon("icons/graph.png", icon_size)
-        edit_icon = self.resize_icon("icons/edit.png", icon_size)
+        edit_icon = self.resize_icon("icons/add.png", icon_size)
         theme_icon = self.resize_icon("icons/theme.png", icon_size)
         shortcuts_icon = self.resize_icon("icons/shortcuts.png", icon_size)
         save_icon = self.resize_icon("icons/save.png", icon_size)
@@ -85,6 +87,7 @@ class OpenUtopiaFinanceApp:
         tk.Button(toolbar_frame, image=zoom_icon, command=self.enable_zoom).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=grid_icon, command=self.toggle_grid).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=subplot_icon, command=self.configure_subplots).pack(side=tk.LEFT, padx=2)
+        tk.Button(toolbar_frame, image=resize_icon, command=self.resize_graph).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=graph_icon, command=self.edit_graph_type).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=edit_icon, command=self.edit_income).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=theme_icon, command=self.change_theme).pack(side=tk.LEFT, padx=2)
@@ -93,7 +96,7 @@ class OpenUtopiaFinanceApp:
 
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
-                      subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon]
+                subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon, resize_icon]
         
     def bind_shortcuts(self):
         """Binds keyboard shortcuts."""
@@ -141,7 +144,7 @@ class OpenUtopiaFinanceApp:
 
         def save_shortcuts():
             """Saves the user-defined shortcuts and rebinds them."""
-            self.unbind_shortcuts()  # Unbind all current shortcuts
+            self.unbind_shortcuts() 
 
             self.shortcuts["edit_income"] = edit_income_entry.get()
             self.shortcuts["toggle_grid"] = toggle_grid_entry.get()
@@ -149,15 +152,15 @@ class OpenUtopiaFinanceApp:
             self.shortcuts["enable_zoom"] = enable_zoom_entry.get()
             self.shortcuts["save_graph"] = save_graph_entry.get()
 
-            self.bind_shortcuts()  # Rebind new shortcuts
+            self.bind_shortcuts()  
             shortcut_dialog.destroy()
 
         def reset_shortcuts():
             """Resets shortcuts to their original values and rebinds them."""
-            self.unbind_shortcuts()  # Unbind all current shortcuts
+            self.unbind_shortcuts()  
 
-            self.shortcuts = self.original_shortcuts.copy()  # Reset to original
-            self.bind_shortcuts()  # Rebind original shortcuts
+            self.shortcuts = self.original_shortcuts.copy()  
+            self.bind_shortcuts()  
 
             # Update the entries in the dialog to reflect the reset shortcuts
             edit_income_entry.delete(0, tk.END)
@@ -174,27 +177,91 @@ class OpenUtopiaFinanceApp:
         Button(shortcut_dialog, text="Save", command=save_shortcuts).grid(row=5, column=0, padx=10, pady=20)
         Button(shortcut_dialog, text="Reset", command=reset_shortcuts).grid(row=5, column=1, padx=10, pady=20)
 
-    def setup_data_entry_form(self):
-        """Sets up the data entry form for user input."""
-        entry_frame = tk.Frame(self.root)
-        entry_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
+    def resize_graph(self):
+        """Method to handle resizing the graph in real-time."""
+        resize_dialog = tk.Toplevel()
+        resize_dialog.title("Resize Graph")
 
-        tk.Label(entry_frame, text="Period:").grid(row=0, column=0, padx=5, pady=5)
-        self.period_entry = tk.Entry(entry_frame)
-        self.period_entry.grid(row=0, column=1, padx=5, pady=5)
+        # Sliders for resizing
+        left_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Left Margin")
+        left_slider.pack()
+        left_slider.set(self.current_margins["left"])
+        left_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(left_slider.get(), None, None, None))
 
-        tk.Label(entry_frame, text="Amount:").grid(row=0, column=2, padx=5, pady=5)
-        self.amount_entry = tk.Entry(entry_frame)
-        self.amount_entry.grid(row=0, column=3, padx=5, pady=5)
+        right_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Right Margin")
+        right_slider.pack()
+        right_slider.set(self.current_margins["right"])
+        right_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(None, right_slider.get(), None, None))
 
-        add_button = tk.Button(entry_frame, text="Add Data", command=self.add_income_data)
-        add_button.grid(row=0, column=4, padx=5, pady=5)
+        top_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Top Margin")
+        top_slider.pack()
+        top_slider.set(self.current_margins["top"])
+        top_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(None, None, top_slider.get(), None))
 
-        clear_button = tk.Button(entry_frame, text="Clear Data", command=self.clear_income_data)
-        clear_button.grid(row=0, column=5, padx=5, pady=5)
+        bottom_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Bottom Margin")
+        bottom_slider.pack()
+        bottom_slider.set(self.current_margins["bottom"])
+        bottom_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(None, None, None, bottom_slider.get()))
 
-        update_button = tk.Button(entry_frame, text="Update Graph", command=self.update_graph)
-        update_button.grid(row=0, column=6, padx=5, pady=5)
+        # Reset button
+        reset_button = tk.Button(resize_dialog, text="Reset", command=lambda: self.reset_margins(left_slider, right_slider, top_slider, bottom_slider))
+        reset_button.pack(side=tk.BOTTOM, padx=10, pady=20)
+
+    def update_graph_with_sliders(self, left=None, right=None, top=None, bottom=None):
+        """Updates the graph with the current slider values in real-time."""
+        if left is not None:
+            self.current_margins["left"] = left
+        if right is not None:
+            self.current_margins["right"] = right
+        if top is not None:
+            self.current_margins["top"] = top
+        if bottom is not None:
+            self.current_margins["bottom"] = bottom
+        
+        self.update_graph_with_margins()
+
+    def update_graph_with_margins(self):
+        """Applies the current margins to the graph."""
+        self.ax.set_position([
+            self.current_margins["left"], 
+            self.current_margins["bottom"], 
+            self.current_margins["right"] - self.current_margins["left"], 
+            self.current_margins["top"] - self.current_margins["bottom"]
+        ])
+        self.canvas.draw()
+
+    def reset_margins(self, left_slider, right_slider, top_slider, bottom_slider):
+        """Resets margins to their original values and updates sliders."""
+        self.current_margins = self.default_margins.copy()
+        
+        # Update sliders to reflect default margins
+        left_slider.set(self.default_margins["left"])
+        right_slider.set(self.default_margins["right"])
+        top_slider.set(self.default_margins["top"])
+        bottom_slider.set(self.default_margins["bottom"])
+        self.update_graph_with_margins()
+
+        def setup_data_entry_form(self):
+            """Sets up the data entry form for user input."""
+            entry_frame = tk.Frame(self.root)
+            entry_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
+
+            tk.Label(entry_frame, text="Period:").grid(row=0, column=0, padx=5, pady=5)
+            self.period_entry = tk.Entry(entry_frame)
+            self.period_entry.grid(row=0, column=1, padx=5, pady=5)
+
+            tk.Label(entry_frame, text="Amount:").grid(row=0, column=2, padx=5, pady=5)
+            self.amount_entry = tk.Entry(entry_frame)
+            self.amount_entry.grid(row=0, column=3, padx=5, pady=5)
+
+            add_button = tk.Button(entry_frame, text="Add Data", command=self.add_income_data)
+            add_button.grid(row=0, column=4, padx=5, pady=5)
+
+            clear_button = tk.Button(entry_frame, text="Clear Data", command=self.clear_income_data)
+            clear_button.grid(row=0, column=5, padx=5, pady=5)
+
+            update_button = tk.Button(entry_frame, text="Update Graph", command=self.update_graph)
+            update_button.grid(row=0, column=6, padx=5, pady=5)
 
     def resize_icon(self, image_path, size):
         """Resizes an icon to the specified size and returns a PhotoImage."""
