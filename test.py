@@ -157,7 +157,7 @@ class OpenUtopiaFinanceApp:
 
         def reset_shortcuts():
             """Resets shortcuts to their original values and rebinds them."""
-            self.unbind_shortcuts()  # Unbind all current shortcuts
+            self.unbind_shortcuts()  
 
             self.shortcuts = self.original_shortcuts.copy()  
             self.bind_shortcuts()  
