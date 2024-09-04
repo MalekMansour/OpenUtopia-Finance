@@ -17,7 +17,7 @@ class OpenUtopiaFinanceApp:
         # Initialize income data
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
 
-        # Set up toolbar
+        # Toolbar
         self.setup_toolbar()
 
         # Set up matplotlib figure
