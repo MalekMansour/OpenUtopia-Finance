@@ -17,7 +17,7 @@ class OpenUtopiaFinanceApp:
         # Initialize income data
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
 
-        # Toolbar
+        # Set up toolbar
         self.setup_toolbar()
 
         # Set up matplotlib figure
@@ -144,7 +144,7 @@ class OpenUtopiaFinanceApp:
 
         def save_shortcuts():
             """Saves the user-defined shortcuts and rebinds them."""
-            self.unbind_shortcuts()  # Unbind all current shortcuts
+            self.unbind_shortcuts() 
 
             self.shortcuts["edit_income"] = edit_income_entry.get()
             self.shortcuts["toggle_grid"] = toggle_grid_entry.get()
