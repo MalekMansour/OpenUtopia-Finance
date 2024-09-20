@@ -77,7 +77,6 @@ class OpenUtopiaFinanceApp:
         move_icon = self.resize_icon("icons/move.png", icon_size)
         zoom_icon = self.resize_icon("icons/zoom.png", icon_size)
         grid_icon = self.resize_icon("icons/grid.png", icon_size)
-        subplot_icon = self.resize_icon("icons/subplot.png", icon_size)
         resize_icon = self.resize_icon("icons/edit.png", icon_size)
         graph_icon = self.resize_icon("icons/graph.png", icon_size)
         edit_icon = self.resize_icon("icons/add.png", icon_size)
@@ -93,7 +92,6 @@ class OpenUtopiaFinanceApp:
         tk.Button(toolbar_frame, image=move_icon, command=self.enable_move).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=zoom_icon, command=self.enable_zoom).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=grid_icon, command=self.toggle_grid).pack(side=tk.LEFT, padx=2)
-        tk.Button(toolbar_frame, image=subplot_icon, command=self.configure_subplots).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=resize_icon, command=self.resize_graph).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=graph_icon, command=self.edit_graph_type).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=edit_icon, command=self.edit_income).pack(side=tk.LEFT, padx=2)
@@ -103,7 +101,7 @@ class OpenUtopiaFinanceApp:
 
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
-                subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon, resize_icon]
+                graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon, resize_icon]
         
 # SHORTCUT BUTTON SECTION
     def bind_shortcuts(self):
@@ -284,14 +282,8 @@ class OpenUtopiaFinanceApp:
         Button(graph_type_dialog, text="Bar Graph", command=lambda: set_graph_type("bar")).pack(pady=5)
 
 # GRAPH RESIZING
-    def configure_subplots(self):
-        """Open subplot configuration window."""
-        self.figure.subplots_adjust(left=self.current_margins["left"], right=self.current_margins["right"],
-                                    top=self.current_margins["top"], bottom=self.current_margins["bottom"])
-        self.canvas.draw()
-
     def resize_graph(self):
-        """Resize the graph area."""
+        """Resize the graph area in real-time."""
         resize_dialog = Toplevel(self.root)
         resize_dialog.title("Resize Graph")
         resize_dialog.geometry("300x300")
@@ -316,19 +308,26 @@ class OpenUtopiaFinanceApp:
         bottom_scale.set(self.current_margins["bottom"])
         bottom_scale.pack()
 
-        def save_resize():
-            """Save the resized margins."""
+        # Update the graph as the user adjusts the scales
+        def update_margins(event=None):
+            """Update the margins and redraw the graph in real-time."""
             self.current_margins["left"] = left_scale.get()
             self.current_margins["right"] = right_scale.get()
             self.current_margins["top"] = top_scale.get()
             self.current_margins["bottom"] = bottom_scale.get()
 
             self.figure.subplots_adjust(left=self.current_margins["left"], right=self.current_margins["right"],
-                                        top=self.current_margins["top"], bottom=self.current_margins["bottom"])
+                                    top=self.current_margins["top"], bottom=self.current_margins["bottom"])
             self.canvas.draw()
-            resize_dialog.destroy()
 
-        Button(resize_dialog, text="Apply", command=save_resize).pack(pady=20)
+        # Bind scale adjustments to real-time updates
+        left_scale.bind("<Motion>", update_margins)
+        right_scale.bind("<Motion>", update_margins)
+        top_scale.bind("<Motion>", update_margins)
+        bottom_scale.bind("<Motion>", update_margins)
+
+        # Add an "Exit" button to close the resize dialog
+        Button(resize_dialog, text="Exit", command=resize_dialog.destroy).pack(pady=20)
 
 # EDIT DATA
     def edit_income(self):
