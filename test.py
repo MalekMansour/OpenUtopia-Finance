@@ -12,6 +12,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 import pandas as pd
 from PIL import Image, ImageTk
 import xlsxwriter
+import openpyxl
 
 class OpenUtopiaFinanceApp:
     def __init__(self, root):
