@@ -1,6 +1,9 @@
+# Author: Malek Mansour
+# LICENSE: MIT License
+# Year Created: 2024
+# Description: N/A
 
-
-
+# Imports
 import tkinter as tk
 from tkinter import filedialog, simpledialog, messagebox, Toplevel, Label, Button, Scale, HORIZONTAL
 from tkinter import ttk
@@ -20,7 +23,7 @@ class OpenUtopiaFinanceApp:
         # Initialize income data
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
 
-        # Set up toolbar
+        # Toolbar
         self.setup_toolbar()
 
         # Set up matplotlib figure
@@ -64,7 +67,7 @@ class OpenUtopiaFinanceApp:
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
 
-        # Icons Size
+        # Icon Size & Images
         icon_size = (30, 30) 
 
         open_icon = self.resize_icon("icons/folder.png", icon_size)
@@ -82,6 +85,7 @@ class OpenUtopiaFinanceApp:
         shortcuts_icon = self.resize_icon("icons/shortcuts.png", icon_size)
         save_icon = self.resize_icon("icons/save.png", icon_size)
 
+        # Icons & Their Functions
         tk.Button(toolbar_frame, image=open_icon, command=self.open_file).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=home_icon, command=self.reset_view).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=back_icon, command=self.go_back).pack(side=tk.LEFT, padx=2)
@@ -101,6 +105,7 @@ class OpenUtopiaFinanceApp:
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
                 subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon, resize_icon]
         
+# SHORTCUT BUTTON SECTION
     def bind_shortcuts(self):
         """Binds keyboard shortcuts."""
         self.root.bind(self.shortcuts["edit_income"], lambda event: self.edit_income())
@@ -180,6 +185,7 @@ class OpenUtopiaFinanceApp:
         Button(shortcut_dialog, text="Save", command=save_shortcuts).grid(row=5, column=0, padx=10, pady=20)
         Button(shortcut_dialog, text="Reset", command=reset_shortcuts).grid(row=5, column=1, padx=10, pady=20)
 
+# THEMES
     def apply_theme(self, background, foreground):
         """Applies the theme to the plot."""
         self.figure.patch.set_facecolor(background)
@@ -192,14 +198,21 @@ class OpenUtopiaFinanceApp:
         self.canvas.draw()
 
     def change_theme(self):
-        """Switches between different themes."""
+        """Switches between multiple themes."""
         if self.current_theme == "default":
-            self.apply_theme("#000000", "#FFFFFF")
+            self.apply_theme("#000000", "#FFFFFF")  # Switch to dark theme
             self.current_theme = "dark"
+        elif self.current_theme == "dark":
+            self.apply_theme("#FFD700", "#000000")  # Switch to gold theme
+            self.current_theme = "gold"
+        elif self.current_theme == "gold":
+            self.apply_theme("#228B22", "#FFFFFF")  # Switch to forest theme
+            self.current_theme = "forest"
         else:
-            self.apply_theme("#F5F7F8", "black")
+            self.apply_theme("#F5F7F8", "black")  # Switch back to default theme
             self.current_theme = "default"
 
+# OPEN FILE
     def open_file(self):
         """Handles the action of opening a file."""
         file_path = filedialog.askopenfilename(title="Open Income Data", filetypes=[("CSV Files", "*.csv")])
