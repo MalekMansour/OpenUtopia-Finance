@@ -203,13 +203,13 @@ class OpenUtopiaFinanceApp:
             self.apply_theme("#000000", "#FFFFFF")  # Switch to dark theme
             self.current_theme = "dark"
         elif self.current_theme == "dark":
-            self.apply_theme("#FFD700", "#000000")  # Switch to gold theme
-            self.current_theme = "gold"
-        elif self.current_theme == "gold":
-            self.apply_theme("#228B22", "#FFFFFF")  # Switch to forest theme
-            self.current_theme = "forest"
+            self.apply_theme("#001F3F", "#FFFFFF")  # Switch to blue theme
+            self.current_theme = "blue"
+        elif self.current_theme == "blue":
+            self.apply_theme("#A04747", "#FFFFFF")  # Switch to red theme
+            self.current_theme = "red"
         else:
-            self.apply_theme("#F5F7F8", "black")  # Switch back to default theme
+            self.apply_theme("#F5F7F8", "#000000")  # Switch back to default theme
             self.current_theme = "default"
 
 # OPEN FILE
@@ -225,12 +225,14 @@ class OpenUtopiaFinanceApp:
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load file: {e}")
 
+# Reset View
     def reset_view(self):
         """Resets the graph view."""
         self.ax.relim()
         self.ax.autoscale_view()
         self.canvas.draw()
 
+# GO BACK AND FORWARD
     def go_back(self):
         """Go back to the previous state in the history."""
         if self.history_index > 0:
@@ -245,11 +247,13 @@ class OpenUtopiaFinanceApp:
             self.income_data = self.history[self.history_index].copy()
             self.plot_income()
 
+# ENABLE MOVEMENT
     def enable_move(self):
         """Enable panning of the plot."""
         self.canvas.get_tk_widget().configure(cursor="fleur")
         self.nav_toolbar.pan() 
 
+# ENABLE ZOOM
     def enable_zoom(self):
         """Enable zoom functionality."""
         self.canvas.get_tk_widget().configure(cursor="cross")
