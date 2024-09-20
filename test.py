@@ -259,12 +259,31 @@ class OpenUtopiaFinanceApp:
         self.canvas.get_tk_widget().configure(cursor="cross")
         self.nav_toolbar.zoom() 
 
+# TOGGLE GRID
     def toggle_grid(self):
         """Toggle the grid display on the graph."""
         self.grid_shown = not self.grid_shown
         self.ax.grid(self.grid_shown)
         self.canvas.draw()
 
+# EDIT GRAPH TYPE
+    def edit_graph_type(self):
+        """Opens a window to edit the graph type."""
+        graph_type_dialog = Toplevel(self.root)
+        graph_type_dialog.title("Edit Graph Type")
+        graph_type_dialog.geometry("300x200")
+
+        Label(graph_type_dialog, text="Select Graph Type:").pack(pady=20)
+
+        def set_graph_type(graph_type):
+            self.graph_type = graph_type
+            self.plot_income()
+            graph_type_dialog.destroy()
+
+        Button(graph_type_dialog, text="Line Graph", command=lambda: set_graph_type("line")).pack(pady=5)
+        Button(graph_type_dialog, text="Bar Graph", command=lambda: set_graph_type("bar")).pack(pady=5)
+
+# GRAPH RESIZING
     def configure_subplots(self):
         """Open subplot configuration window."""
         self.figure.subplots_adjust(left=self.current_margins["left"], right=self.current_margins["right"],
@@ -311,6 +330,7 @@ class OpenUtopiaFinanceApp:
 
         Button(resize_dialog, text="Apply", command=save_resize).pack(pady=20)
 
+# EDIT DATA
     def edit_income(self):
         """Allows the user to edit income data."""
         amount = simpledialog.askfloat("Edit Income", "Enter the new income amount:")
@@ -346,28 +366,14 @@ class OpenUtopiaFinanceApp:
         self.ax.set_ylabel("Amount")
         self.canvas.draw()
 
-    def edit_graph_type(self):
-        """Opens a window to edit the graph type."""
-        graph_type_dialog = Toplevel(self.root)
-        graph_type_dialog.title("Edit Graph Type")
-        graph_type_dialog.geometry("300x200")
-
-        Label(graph_type_dialog, text="Select Graph Type:").pack(pady=20)
-
-        def set_graph_type(graph_type):
-            self.graph_type = graph_type
-            self.plot_income()
-            graph_type_dialog.destroy()
-
-        Button(graph_type_dialog, text="Line Graph", command=lambda: set_graph_type("line")).pack(pady=5)
-        Button(graph_type_dialog, text="Bar Graph", command=lambda: set_graph_type("bar")).pack(pady=5)
-
+# DONT TOUCH THIS
     def resize_icon(self, path, size):
         """Resizes an icon for the toolbar."""
         image = Image.open(path)
-        image = image.resize(size, Image.Resampling.LANCZOS)  # Use LANCZOS for high-quality resizing
+        image = image.resize(size, Image.Resampling.LANCZOS) 
         return ImageTk.PhotoImage(image)
     
+# SAVE GRAPH TO EXCEL FILE
     def save_graph(self):
         """Save the income data and graph settings to an Excel file."""
         file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel Files", "*.xlsx")])
@@ -389,6 +395,7 @@ class OpenUtopiaFinanceApp:
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to save file: {e}")
 
+# IMPORT EXCEL FILE
     def open_file(self):
         """Load the income data and graph settings from an Excel file."""
         file_path = filedialog.askopenfilename(title="Open Excel File", filetypes=[("Excel Files", "*.xlsx")])
@@ -411,6 +418,7 @@ class OpenUtopiaFinanceApp:
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load file: {e}")
 
+# UPDATE GRAPH (DONT TOUCH)
     def update_graph(self):
         """Updates the graph with the current income data."""
         self.ax.clear()
