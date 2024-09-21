@@ -403,11 +403,8 @@ class OpenUtopiaFinanceApp:
                 metadata = pd.read_excel(file_path, sheet_name="Metadata")
                 self.graph_type = metadata.loc[metadata['Setting'] == 'GraphType', 'Value'].values[0]
                 self.current_theme = metadata.loc[metadata['Setting'] == 'Theme', 'Value'].values[0]
-
-            # Apply the loaded theme and graph settings
-                self.apply_theme("#F5F7F8" if self.current_theme == "default" else "#000000", "black" if self.current_theme == "default" else "#FFFFFF")
             
-                self.plot_income()  # Plot the loaded data
+                self.plot_income() 
             
                 messagebox.showinfo("Success", "Data loaded successfully!")
             except Exception as e:
