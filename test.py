@@ -88,7 +88,7 @@ class OpenUtopiaFinanceApp:
 
         # Icons & Their Functions
         tk.Button(toolbar_frame, image=open_icon, command=self.open_file).pack(side=tk.LEFT, padx=2)
-        tk.Button(toolbar_frame, image=home_icon, command=self.reset_view).pack(side=tk.LEFT, padx=2)
+        tk.Button(toolbar_frame, image=home_icon, command=self.home).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=back_icon, command=self.go_back).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=forward_icon, command=self.go_forward).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=move_icon, command=self.enable_move).pack(side=tk.LEFT, padx=2)
@@ -224,13 +224,7 @@ class OpenUtopiaFinanceApp:
                 self.history_index += 1  
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load file: {e}")
-
-# Reset View
-    def reset_view(self):
-        """Resets the graph view."""
-        self.ax.relim()
-        self.ax.autoscale_view()
-        self.canvas.draw()
+    import os
 
 # GO BACK AND FORWARD
     def go_back(self):
@@ -327,9 +321,6 @@ class OpenUtopiaFinanceApp:
         right_scale.bind("<Motion>", update_margins)
         top_scale.bind("<Motion>", update_margins)
         bottom_scale.bind("<Motion>", update_margins)
-
-        # Add an "Exit" button to close the resize dialog
-        Button(resize_dialog, text="Exit", command=resize_dialog.destroy).pack(pady=20)
 
 # EDIT DATA
     def edit_income(self):
