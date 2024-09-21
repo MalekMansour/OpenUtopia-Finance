@@ -1,15 +1,42 @@
+'''
+App: OpenUtopia Finance
+Author: Malek Mansour
+LICENSE: MIT License
+Year Created: 2024
+
+Description: 
+Financial management tool designed to help users visualize and analyze their income data through various graph 
+types. Features include the ability to create, load, and customize graphs, as well as user-friendly navigation 
+options. The app aims to empower users to make informed financial decisions through intuitive visualizations.
+'''
+
+# Imports
+import os
+import sys
 import tkinter as tk
 from tkinter import filedialog, simpledialog, messagebox, Toplevel, Label, Button, Scale, HORIZONTAL
 from tkinter import ttk
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import pandas as pd
 from PIL import Image, ImageTk
+import mplfinance as mpf
+import xlsxwriter
+import openpyxl
+import numpy as np
+import webbrowser
 
 class OpenUtopiaFinanceApp:
     def __init__(self, root):
         self.root = root
         self.root.title("OpenUtopia Finance")
+        self.root.geometry("1200x900")
+
+        # Load the logo image
+        logo_image = Image.open("icons/logo/logo_openutopia.png")  
+        self.logo = ImageTk.PhotoImage(logo_image)
+        self.root.iconphoto(True, self.logo)
 
         # Default Grid Toggled OFF
         self.grid_shown = False
@@ -17,7 +44,7 @@ class OpenUtopiaFinanceApp:
         # Initialize income data
         self.income_data = pd.DataFrame(columns=["Period", "Amount"])
 
-        # Set up toolbar
+        # Toolbar
         self.setup_toolbar()
 
         # Set up matplotlib figure
@@ -36,9 +63,6 @@ class OpenUtopiaFinanceApp:
         # History for back/forward functionality
         self.history = []
         self.history_index = -1
-
-        # Set initial theme
-        self.apply_theme("#F5F7F8", "black")
 
          # Shortcuts storage
         self.original_shortcuts = {
@@ -61,7 +85,7 @@ class OpenUtopiaFinanceApp:
         toolbar_frame = tk.Frame(self.root)
         toolbar_frame.pack(side=tk.TOP, fill=tk.X)
 
-        # Icons Size
+        # Icon Size & Images
         icon_size = (30, 30) 
 
         open_icon = self.resize_icon("icons/folder.png", icon_size)
@@ -71,7 +95,6 @@ class OpenUtopiaFinanceApp:
         move_icon = self.resize_icon("icons/move.png", icon_size)
         zoom_icon = self.resize_icon("icons/zoom.png", icon_size)
         grid_icon = self.resize_icon("icons/grid.png", icon_size)
-        subplot_icon = self.resize_icon("icons/subplot.png", icon_size)
         resize_icon = self.resize_icon("icons/edit.png", icon_size)
         graph_icon = self.resize_icon("icons/graph.png", icon_size)
         edit_icon = self.resize_icon("icons/add.png", icon_size)
@@ -79,14 +102,14 @@ class OpenUtopiaFinanceApp:
         shortcuts_icon = self.resize_icon("icons/shortcuts.png", icon_size)
         save_icon = self.resize_icon("icons/save.png", icon_size)
 
+        # Icons & Their Functions
         tk.Button(toolbar_frame, image=open_icon, command=self.open_file).pack(side=tk.LEFT, padx=2)
-        tk.Button(toolbar_frame, image=home_icon, command=self.reset_view).pack(side=tk.LEFT, padx=2)
+        tk.Button(toolbar_frame, image=home_icon, command=self.home_page).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=back_icon, command=self.go_back).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=forward_icon, command=self.go_forward).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=move_icon, command=self.enable_move).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=zoom_icon, command=self.enable_zoom).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=grid_icon, command=self.toggle_grid).pack(side=tk.LEFT, padx=2)
-        tk.Button(toolbar_frame, image=subplot_icon, command=self.configure_subplots).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=resize_icon, command=self.resize_graph).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=graph_icon, command=self.edit_graph_type).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=edit_icon, command=self.edit_income).pack(side=tk.LEFT, padx=2)
@@ -96,8 +119,41 @@ class OpenUtopiaFinanceApp:
 
         # Store references to images so they aren't garbage collected
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
-                subplot_icon, graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon, resize_icon]
+                graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon, resize_icon]
         
+    def home_page(self):
+        """Opens the home page with options."""
+        home_dialog = tk.Toplevel(self.root)
+        home_dialog.title("Home Page")
+        home_dialog.geometry("300x200")
+
+        def new_graph():
+            """Restarts the program to create a new blank graph."""
+            python = sys.executable
+            os.execl(python, python, *sys.argv)  # Relaunch the program
+
+        def load_graph():
+            """Loads a graph using the existing open_file method."""
+            file_path = filedialog.askopenfilename(
+                title="Open Graph File", 
+                filetypes=[("CSV Files", "*.csv"), ("All Files", "*.*")]
+            )
+            if file_path:
+                self.open_file(file_path)  
+            home_dialog.destroy() 
+
+        def open_website():
+            """Opens the website to download the software."""
+            webbrowser.open("https://github.com/MalekMansour/OpenUtopia-Finance")  
+            home_dialog.destroy()
+
+        # Add buttons for the home page
+        tk.Button(home_dialog, text="New Graph", command=new_graph).pack(pady=10)
+        tk.Button(home_dialog, text="Load Graph", command=load_graph).pack(pady=10)
+        tk.Button(home_dialog, text="Website", command=open_website).pack(pady=10)
+        tk.Button(home_dialog, text="Exit", command=home_dialog.destroy).pack(pady=10)
+
+# SHORTCUT BUTTON SECTION
     def bind_shortcuts(self):
         """Binds keyboard shortcuts."""
         self.root.bind(self.shortcuts["edit_income"], lambda event: self.edit_income())
@@ -177,155 +233,148 @@ class OpenUtopiaFinanceApp:
         Button(shortcut_dialog, text="Save", command=save_shortcuts).grid(row=5, column=0, padx=10, pady=20)
         Button(shortcut_dialog, text="Reset", command=reset_shortcuts).grid(row=5, column=1, padx=10, pady=20)
 
-    def resize_graph(self):
-        """Method to handle resizing the graph in real-time."""
-        resize_dialog = tk.Toplevel()
-        resize_dialog.title("Resize Graph")
-
-        # Sliders for resizing
-        left_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Left Margin")
-        left_slider.pack()
-        left_slider.set(self.current_margins["left"])
-        left_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(left_slider.get(), None, None, None))
-
-        right_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Right Margin")
-        right_slider.pack()
-        right_slider.set(self.current_margins["right"])
-        right_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(None, right_slider.get(), None, None))
-
-        top_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Top Margin")
-        top_slider.pack()
-        top_slider.set(self.current_margins["top"])
-        top_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(None, None, top_slider.get(), None))
-
-        bottom_slider = tk.Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, label="Bottom Margin")
-        bottom_slider.pack()
-        bottom_slider.set(self.current_margins["bottom"])
-        bottom_slider.bind("<Motion>", lambda event: self.update_graph_with_sliders(None, None, None, bottom_slider.get()))
-
-        # Reset button
-        reset_button = tk.Button(resize_dialog, text="Reset", command=lambda: self.reset_margins(left_slider, right_slider, top_slider, bottom_slider))
-        reset_button.pack(side=tk.BOTTOM, padx=10, pady=20)
-
-    def update_graph_with_sliders(self, left=None, right=None, top=None, bottom=None):
-        """Updates the graph with the current slider values in real-time."""
-        if left is not None:
-            self.current_margins["left"] = left
-        if right is not None:
-            self.current_margins["right"] = right
-        if top is not None:
-            self.current_margins["top"] = top
-        if bottom is not None:
-            self.current_margins["bottom"] = bottom
-        
-        self.update_graph_with_margins()
-
-    def update_graph_with_margins(self):
-        """Applies the current margins to the graph."""
-        self.ax.set_position([
-            self.current_margins["left"], 
-            self.current_margins["bottom"], 
-            self.current_margins["right"] - self.current_margins["left"], 
-            self.current_margins["top"] - self.current_margins["bottom"]
-        ])
+# THEMES
+    def apply_theme(self, background, foreground):
+        """Applies the theme to the plot."""
+        self.figure.patch.set_facecolor(background)
+        self.ax.set_facecolor(background)
+        self.ax.tick_params(colors=foreground)
+        self.ax.xaxis.label.set_color(foreground)
+        self.ax.yaxis.label.set_color(foreground)
+        self.ax.title.set_color(foreground)
+        self.current_theme = {"background": background, "foreground": foreground}
         self.canvas.draw()
 
-    def reset_margins(self, left_slider, right_slider, top_slider, bottom_slider):
-        """Resets margins to their original values and updates sliders."""
-        self.current_margins = self.default_margins.copy()
-        
-        # Update sliders to reflect default margins
-        left_slider.set(self.default_margins["left"])
-        right_slider.set(self.default_margins["right"])
-        top_slider.set(self.default_margins["top"])
-        bottom_slider.set(self.default_margins["bottom"])
-        self.update_graph_with_margins()
+    def change_theme(self):
+        """Switches between multiple themes."""
+        if self.current_theme == "default":
+            self.apply_theme("#1B1C1E", "#FFFFFF")  # Switch to dark theme
+            self.current_theme = "dark"
+        elif self.current_theme == "dark":
+            self.apply_theme("#001F3F", "#FFFFFF")  # Switch to blue theme
+            self.current_theme = "blue"
+        elif self.current_theme == "blue":
+            self.apply_theme("#303030", "#FFFFFF")  # Switch to grey theme
+            self.current_theme = "grey"
+        else:
+            self.apply_theme("#F5F7F8", "#000000")  # Switch back to default theme
+            self.current_theme = "default"
 
-        def setup_data_entry_form(self):
-            """Sets up the data entry form for user input."""
-            entry_frame = tk.Frame(self.root)
-            entry_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
-
-            tk.Label(entry_frame, text="Period:").grid(row=0, column=0, padx=5, pady=5)
-            self.period_entry = tk.Entry(entry_frame)
-            self.period_entry.grid(row=0, column=1, padx=5, pady=5)
-
-            tk.Label(entry_frame, text="Amount:").grid(row=0, column=2, padx=5, pady=5)
-            self.amount_entry = tk.Entry(entry_frame)
-            self.amount_entry.grid(row=0, column=3, padx=5, pady=5)
-
-            add_button = tk.Button(entry_frame, text="Add Data", command=self.add_income_data)
-            add_button.grid(row=0, column=4, padx=5, pady=5)
-
-            clear_button = tk.Button(entry_frame, text="Clear Data", command=self.clear_income_data)
-            clear_button.grid(row=0, column=5, padx=5, pady=5)
-
-            update_button = tk.Button(entry_frame, text="Update Graph", command=self.update_graph)
-            update_button.grid(row=0, column=6, padx=5, pady=5)
-
-    def resize_icon(self, image_path, size):
-        """Resizes an icon to the specified size and returns a PhotoImage."""
-        image = Image.open(image_path)
-        image = image.resize(size, Image.Resampling.LANCZOS)
-        return ImageTk.PhotoImage(image)
-
+# OPEN FILE
     def open_file(self):
-        """Opens a file dialog to select an existing graph file."""
-        filename = filedialog.askopenfilename(title="Open Graph", filetypes=[("CSV Files", "*.csv"), ("All Files", "*.*")])
-        if filename:
-            self.load_graph(filename)
+        """Handles the action of opening a file."""
+        file_path = filedialog.askopenfilename(title="Open Income Data", filetypes=[("CSV Files", "*.csv")])
+        if file_path:
+            try:
+                self.income_data = pd.read_csv(file_path)
+                self.plot_income() 
+                self.history.append(self.income_data.copy())  
+                self.history_index += 1  
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to load file: {e}")
+    import os
 
-    def load_graph(self, filename):
-        """Loads a graph from a CSV file."""
-        try:
-            self.income_data = pd.read_csv(filename)
-            self.history.append(self.income_data.copy())
-            self.history_index += 1
-            self.update_graph()
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to load graph: {e}")
-
-    def reset_view(self):
-        """Resets the view to the default state."""
-        self.ax.set_xlim(auto=True)
-        self.ax.set_ylim(auto=True)
-        self.canvas.draw()
-
+# GO BACK AND FORWARD
     def go_back(self):
-        """Navigates back in the graph history."""
+        """Go back to the previous state in the history."""
         if self.history_index > 0:
             self.history_index -= 1
             self.income_data = self.history[self.history_index].copy()
-            self.update_graph()
+            self.plot_income()
 
     def go_forward(self):
-        """Navigates forward in the graph history."""
+        """Go forward to the next state in the history."""
         if self.history_index < len(self.history) - 1:
             self.history_index += 1
             self.income_data = self.history[self.history_index].copy()
-            self.update_graph()
+            self.plot_income()
 
+# ENABLE MOVEMENT
     def enable_move(self):
-        """Enables the move functionality."""
-        self.nav_toolbar.pan()
+        """Enable panning of the plot."""
+        self.canvas.get_tk_widget().configure(cursor="fleur")
+        self.nav_toolbar.pan() 
 
+# ENABLE ZOOM
     def enable_zoom(self):
-        """Enables the zoom functionality."""
-        self.nav_toolbar.zoom()
+        """Enable zoom functionality."""
+        self.canvas.get_tk_widget().configure(cursor="cross")
+        self.nav_toolbar.zoom() 
 
-    def configure_subplots(self):
-        """Configures subplots."""
-        plt.subplots_adjust(left=0.1, bottom=0.3, right=0.9, top=0.7)
-        self.update_graph()
+# TOGGLE GRID
+    def toggle_grid(self):
+        """Toggle the grid display on the graph."""
+        self.grid_shown = not self.grid_shown
+        self.ax.grid(self.grid_shown)
+        self.canvas.draw()
 
+# EDIT GRAPH TYPE
     def edit_graph_type(self):
-        """Allows the user to choose the graph type."""
-        options = ["Line", "Bar", "Candlestick"]
-        graph_type = simpledialog.askstring("Select Graph Type", f"Choose the graph type: {', '.join(options)}")
-        if graph_type:
-            self.graph_type = graph_type.lower()
-            self.update_graph()
+        """Opens a window to edit the graph type."""
+        graph_type_dialog = Toplevel(self.root)
+        graph_type_dialog.title("Edit Graph Type")
+        graph_type_dialog.geometry("300x300")
 
+        Label(graph_type_dialog, text="Select Graph Type:").pack(pady=20)
+
+        def set_graph_type(graph_type):
+            self.graph_type = graph_type
+            self.update_graph() 
+            graph_type_dialog.destroy()
+
+        # Add buttons for each graph type
+        Button(graph_type_dialog, text="Line Graph", command=lambda: set_graph_type("line")).pack(pady=5)
+        Button(graph_type_dialog, text="Line Graph with Dots", command=lambda: set_graph_type("line_with_dots")).pack(pady=5)
+        Button(graph_type_dialog, text="Bar Graph", command=lambda: set_graph_type("bar")).pack(pady=5)
+        Button(graph_type_dialog, text="Histogram", command=lambda: set_graph_type("histogram")).pack(pady=5)
+        Button(graph_type_dialog, text="Spline Chart", command=lambda: set_graph_type("spline")).pack(pady=5)
+
+# GRAPH RESIZING
+    def resize_graph(self):
+        """Resize the graph area in real-time."""
+        resize_dialog = Toplevel(self.root)
+        resize_dialog.title("Resize Graph")
+        resize_dialog.geometry("300x300")
+
+        Label(resize_dialog, text="Left Margin:").pack()
+        left_scale = Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=HORIZONTAL)
+        left_scale.set(self.current_margins["left"])
+        left_scale.pack()
+
+        Label(resize_dialog, text="Right Margin:").pack()
+        right_scale = Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=HORIZONTAL)
+        right_scale.set(self.current_margins["right"])
+        right_scale.pack()
+
+        Label(resize_dialog, text="Top Margin:").pack()
+        top_scale = Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=HORIZONTAL)
+        top_scale.set(self.current_margins["top"])
+        top_scale.pack()
+
+        Label(resize_dialog, text="Bottom Margin:").pack()
+        bottom_scale = Scale(resize_dialog, from_=0, to=1, resolution=0.01, orient=HORIZONTAL)
+        bottom_scale.set(self.current_margins["bottom"])
+        bottom_scale.pack()
+
+        # Update the graph as the user adjusts the scales
+        def update_margins(event=None):
+            """Update the margins and redraw the graph in real-time."""
+            self.current_margins["left"] = left_scale.get()
+            self.current_margins["right"] = right_scale.get()
+            self.current_margins["top"] = top_scale.get()
+            self.current_margins["bottom"] = bottom_scale.get()
+
+            self.figure.subplots_adjust(left=self.current_margins["left"], right=self.current_margins["right"],
+                                    top=self.current_margins["top"], bottom=self.current_margins["bottom"])
+            
+            self.canvas.draw()
+
+        left_scale.bind("<Motion>", update_margins)
+        right_scale.bind("<Motion>", update_margins)
+        top_scale.bind("<Motion>", update_margins)
+        bottom_scale.bind("<Motion>", update_margins)
+
+# EDIT DATA
     def edit_income(self):
         """Allows the user to edit income data."""
         amount = simpledialog.askfloat("Edit Income", "Enter the new income amount:")
@@ -335,54 +384,6 @@ class OpenUtopiaFinanceApp:
             self.history.append(self.income_data.copy())
             self.history_index += 1
             self.update_graph()
-
-    def change_theme(self):
-        """Allows the user to change the application theme."""
-        themes = {
-            "Default": ("#F5F7F8", "black", "default"),
-            "Dark": ("#1e1e1e", "blue", "dark"),
-            "Blue": ("#001f3f", "black", "blue"),
-            "Hacker": ("black", "#06D001", "hacker"),
-            "Orange": ("#E3651D", "black", "orange"),
-            "Red": ("#B31312", "black", "red"),
-            "Sakura": ("#FF8C9E", "black", "sakura"),
-            "Acid": ("#674188", "black", "acid")
-        }
-        theme_names = ", ".join(themes.keys())
-        theme_choice = simpledialog.askstring("Select Theme", f"Choose a theme: {theme_names}")
-        if theme_choice and theme_choice in themes:
-            bg_color, fg_color, self.current_theme = themes[theme_choice]
-            self.apply_theme(bg_color, fg_color)
-
-    def apply_theme(self, bg_color, fg_color):
-        """Applies the selected theme to the app."""
-        self.root.configure(bg=bg_color)
-
-        # Update the colors for all widgets
-        for widget in self.root.winfo_children():
-            widget.configure(bg=bg_color)
-        
-            # Apply foreground color if the widget supports it
-            if isinstance(widget, (tk.Label, tk.Button, tk.Entry, tk.Text, tk.Checkbutton, tk.Radiobutton)):
-                widget.configure(fg=fg_color)
-    
-        # Update the matplotlib graph background and axis colors
-        self.ax.set_facecolor(bg_color)
-        self.ax.spines['bottom'].set_color(fg_color)
-        self.ax.spines['left'].set_color(fg_color)
-        self.ax.spines['top'].set_color(fg_color)
-        self.ax.spines['right'].set_color(fg_color)
-        self.ax.xaxis.label.set_color(fg_color)
-        self.ax.yaxis.label.set_color(fg_color)
-        self.ax.tick_params(axis='x', colors=fg_color)
-        self.ax.tick_params(axis='y', colors=fg_color)
-        self.update_graph()
-
-    def save_graph(self):
-        """Saves the current graph as an image."""
-        filename = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG Files", "*.png"), ("All Files", "*.*")])
-        if filename:
-            self.figure.savefig(filename)
 
     def add_income_data(self):
         """Adds income data to the graph."""
@@ -395,31 +396,115 @@ class OpenUtopiaFinanceApp:
             self.history_index += 1
             self.update_graph()
         except ValueError:
-            messagebox.showerror("Error", "Invalid input. Please enter valid numbers for period and amount.")
+            messagebox.showerror("Error", "Invalid input. Please enter valid numbers.")
 
-    def clear_income_data(self):
-        """Clears all income data."""
-        self.income_data = pd.DataFrame(columns=["Period", "Amount"])
-        self.history = []
-        self.history_index = -1
-        self.update_graph()
+    def plot_income(self):
+        """Plots the income data."""
+        self.ax.clear()  
 
+        if self.graph_type == "line":
+            # Line chart
+            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], marker="o")
+
+        elif self.graph_type == "bar":
+            # Bar chart
+            self.ax.bar(self.income_data["Period"], self.income_data["Amount"])
+        
+        elif self.graph_type == "histogram":
+            # Histogram
+            self.ax.hist(self.income_data["Amount"], bins=10, color='blue', alpha=0.7)
+
+        elif self.graph_type == "spline":
+            # Spline (smoothed line) chart
+            x = np.arange(len(self.income_data["Period"]))
+            z = np.polyfit(x, self.income_data["Amount"], 3)
+            p = np.poly1d(z)
+            self.ax.plot(self.income_data["Period"], p(x), color='green')
+
+        # General configuration
+        self.ax.set_title("Income Data")
+        self.ax.set_xlabel("Period")
+        self.ax.set_ylabel("Amount")
+
+        # Rotate date labels if using datetime for Period
+        self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+        plt.xticks(rotation=45)
+
+        self.canvas.draw()  
+
+# Resize Icons
+    def resize_icon(self, path, size):
+        """Resizes an icon for the toolbar."""
+        image = Image.open(path)
+        image = image.resize(size, Image.Resampling.LANCZOS) 
+        return ImageTk.PhotoImage(image)
+    
+# Save Graph to Excel File
+    def save_graph(self):
+        """Save the income data and graph settings to an Excel file."""
+        file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel Files", "*.xlsx")])
+        if file_path:
+            try:
+                # Create an Excel writer
+                with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
+                    # Save the income data
+                    self.income_data.to_excel(writer, sheet_name="Income Data", index=False)
+                
+                    metadata = pd.DataFrame({
+                        "Setting": ["GraphType", "Theme"],
+                        "Value": [self.graph_type, self.current_theme]
+                    })
+                    metadata.to_excel(writer, sheet_name="Metadata", index=False)
+                
+                messagebox.showinfo("Success", "Data saved successfully!")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to save file: {e}")
+
+# Import Excel File
+    def open_file(self):
+        """Load the income data and graph settings from an Excel file."""
+        file_path = filedialog.askopenfilename(title="Open Excel File", filetypes=[("Excel Files", "*.xlsx")])
+        if file_path:
+            try:
+                # Load the income data
+                self.income_data = pd.read_excel(file_path, sheet_name="Income Data")
+            
+            # Load the metadata
+                metadata = pd.read_excel(file_path, sheet_name="Metadata")
+                self.graph_type = metadata.loc[metadata['Setting'] == 'GraphType', 'Value'].values[0]
+                self.current_theme = metadata.loc[metadata['Setting'] == 'Theme', 'Value'].values[0]
+            
+                self.plot_income() 
+            
+                messagebox.showinfo("Success", "Data loaded successfully!")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to load file: {e}")
+
+# UPDATE GRAPH (DONT TOUCH)
     def update_graph(self):
         """Updates the graph with the current income data."""
         self.ax.clear()
         if not self.income_data.empty:
             if self.graph_type == "line":
                 self.income_data.plot(x="Period", y="Amount", ax=self.ax, legend=False)
+            elif self.graph_type == "line_with_dots":
+                self.income_data.plot(x="Period", y="Amount", marker="o", ax=self.ax, legend=False)
             elif self.graph_type == "bar":
                 self.income_data.plot(kind="bar", x="Period", y="Amount", ax=self.ax, legend=False)
-            elif self.graph_type == "candlestick":
-                self.ax.plot(self.income_data["Period"], self.income_data["Amount"], 'o-')
-        self.canvas.draw()
-
-    def toggle_grid(self):
-        """Toggles the grid on the graph."""
-        self.grid_shown = not self.grid_shown
-        self.ax.grid(self.grid_shown)
+            elif self.graph_type == "histogram":
+                self.ax.hist(self.income_data["Amount"], bins=10)
+            elif self.graph_type == "spline":
+                from scipy.interpolate import make_interp_spline
+                import numpy as np
+                periods = np.array(self.income_data["Period"].index.values, dtype=float)  # Convert Period to numeric
+                amounts = np.array(self.income_data["Amount"])
+                spline = make_interp_spline(periods, amounts)
+                smoothed_periods = np.linspace(periods.min(), periods.max(), 500)
+                smoothed_amounts = spline(smoothed_periods)
+                self.ax.plot(smoothed_periods, smoothed_amounts, color='green')
+        self.ax.set_title("Income Data")
+        self.ax.set_xlabel("Period")
+        self.ax.set_ylabel("Amount")
         self.canvas.draw()
 
 if __name__ == "__main__":
