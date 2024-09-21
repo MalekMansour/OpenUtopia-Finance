@@ -8,11 +8,14 @@ import tkinter as tk
 from tkinter import filedialog, simpledialog, messagebox, Toplevel, Label, Button, Scale, HORIZONTAL
 from tkinter import ttk
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import pandas as pd
 from PIL import Image, ImageTk
+import mplfinance as mpf
 import xlsxwriter
 import openpyxl
+import numpy as np
 
 class OpenUtopiaFinanceApp:
     def __init__(self, root):
@@ -268,17 +271,22 @@ class OpenUtopiaFinanceApp:
         """Opens a window to edit the graph type."""
         graph_type_dialog = Toplevel(self.root)
         graph_type_dialog.title("Edit Graph Type")
-        graph_type_dialog.geometry("300x200")
+        graph_type_dialog.geometry("300x350")
 
         Label(graph_type_dialog, text="Select Graph Type:").pack(pady=20)
 
         def set_graph_type(graph_type):
             self.graph_type = graph_type
-            self.plot_income()
+            self.update_graph()  # Update the graph with the selected type
             graph_type_dialog.destroy()
 
+        # Add buttons for each graph type
         Button(graph_type_dialog, text="Line Graph", command=lambda: set_graph_type("line")).pack(pady=5)
         Button(graph_type_dialog, text="Bar Graph", command=lambda: set_graph_type("bar")).pack(pady=5)
+        Button(graph_type_dialog, text="Candlestick Chart", command=lambda: set_graph_type("candlestick")).pack(pady=5)
+        Button(graph_type_dialog, text="Histogram", command=lambda: set_graph_type("histogram")).pack(pady=5)
+        Button(graph_type_dialog, text="Area Chart", command=lambda: set_graph_type("area")).pack(pady=5)
+        Button(graph_type_dialog, text="Spline Chart", command=lambda: set_graph_type("spline")).pack(pady=5)
 
 # GRAPH RESIZING
     def resize_graph(self):
@@ -351,16 +359,50 @@ class OpenUtopiaFinanceApp:
 
     def plot_income(self):
         """Plots the income data."""
-        self.ax.clear()
+        self.ax.clear()  # Clear the previous plot
+
         if self.graph_type == "line":
+            # Linear chart (line chart)
             self.ax.plot(self.income_data["Period"], self.income_data["Amount"], marker="o")
+        
+        elif self.graph_type == "candlestick":
+            # Candlestick chart
+            # Assuming you have 'Open', 'Close', 'High', and 'Low' columns in your data
+            # Convert period to a datetime index if needed
+            income_candlestick_data = self.income_data.copy()
+            income_candlestick_data['Period'] = pd.to_datetime(income_candlestick_data['Period'])
+            mpf.plot(income_candlestick_data.set_index('Period'), type='candle', ax=self.ax)
+
         elif self.graph_type == "bar":
+            # Bar chart
             self.ax.bar(self.income_data["Period"], self.income_data["Amount"])
+        
+        elif self.graph_type == "histogram":
+            # Histogram
+            self.ax.hist(self.income_data["Amount"], bins=10, color='blue', alpha=0.7)
+        
+        elif self.graph_type == "area":
+            # Area chart
+            self.ax.fill_between(self.income_data["Period"], self.income_data["Amount"], color="skyblue", alpha=0.4)
+            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], color="Slateblue", alpha=0.6)
+
+        elif self.graph_type == "spline":
+            # Spline (smoothed line) chart
+            x = np.arange(len(self.income_data["Period"]))
+            z = np.polyfit(x, self.income_data["Amount"], 3)
+            p = np.poly1d(z)
+            self.ax.plot(self.income_data["Period"], p(x), color='green')
+
+        # General configuration
         self.ax.set_title("Income Data")
         self.ax.set_xlabel("Period")
         self.ax.set_ylabel("Amount")
-        self.canvas.draw()
 
+        # Rotate date labels if using datetime for Period
+        self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+        plt.xticks(rotation=45)
+
+        self.canvas.draw()  # Update the plot on the canvas
 # DONT TOUCH THIS
     def resize_icon(self, path, size):
         """Resizes an icon for the toolbar."""
@@ -413,15 +455,51 @@ class OpenUtopiaFinanceApp:
 # UPDATE GRAPH (DONT TOUCH)
     def update_graph(self):
         """Updates the graph with the current income data."""
-        self.ax.clear()
+        self.ax.clear()  # Clear the previous plot
+
         if not self.income_data.empty:
             if self.graph_type == "line":
-                self.income_data.plot(x="Period", y="Amount", ax=self.ax, legend=False)
+                # Line chart
+                self.income_data.plot(x="Period", y="Amount", ax=self.ax, legend=False, marker='o')
+
             elif self.graph_type == "bar":
+                # Bar chart
                 self.income_data.plot(kind="bar", x="Period", y="Amount", ax=self.ax, legend=False)
+
             elif self.graph_type == "candlestick":
-                self.ax.plot(self.income_data["Period"], self.income_data["Amount"], 'o-')
-        self.canvas.draw()
+                # Candlestick chart
+                income_candlestick_data = self.income_data.copy()
+                income_candlestick_data['Period'] = pd.to_datetime(income_candlestick_data['Period'])
+                mpf.plot(income_candlestick_data.set_index('Period'), type='candle', ax=self.ax)
+
+            elif self.graph_type == "histogram":
+                # Histogram
+                self.ax.hist(self.income_data["Amount"], bins=10, color='blue', alpha=0.7)
+
+            elif self.graph_type == "area":
+                # Area chart
+                self.ax.fill_between(self.income_data["Period"], self.income_data["Amount"], color="skyblue", alpha=0.4)
+                self.ax.plot(self.income_data["Period"], self.income_data["Amount"], color="Slateblue", alpha=0.6)
+
+            elif self.graph_type == "spline":
+                # Spline (smoothed line) chart
+                x = np.arange(len(self.income_data["Period"]))
+                z = np.polyfit(x, self.income_data["Amount"], 3)
+                p = np.poly1d(z)
+                self.ax.plot(self.income_data["Period"], p(x), color='green')
+
+            # Set the title, axis labels
+            self.ax.set_title("Income Data")
+            self.ax.set_xlabel("Period")
+            self.ax.set_ylabel("Amount")
+
+            # Rotate date labels if using datetime for Period
+            if pd.api.types.is_datetime64_any_dtype(self.income_data['Period']):
+                self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+                self.ax.xaxis.set_major_locator(mdates.MonthLocator())  # Adjust as necessary
+                plt.xticks(rotation=45)
+
+        self.canvas.draw()  # Update the canvas with the new plot
 
 if __name__ == "__main__":
     root = tk.Tk()
