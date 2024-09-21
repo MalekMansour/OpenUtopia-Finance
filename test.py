@@ -274,16 +274,14 @@ class OpenUtopiaFinanceApp:
 
         def set_graph_type(graph_type):
             self.graph_type = graph_type
-            self.update_graph()  # Update the graph with the selected type
+            self.update_graph() 
             graph_type_dialog.destroy()
 
         # Add buttons for each graph type
         Button(graph_type_dialog, text="Line Graph", command=lambda: set_graph_type("line")).pack(pady=5)
         Button(graph_type_dialog, text="Line Graph with Dots", command=lambda: set_graph_type("line_with_dots")).pack(pady=5)
         Button(graph_type_dialog, text="Bar Graph", command=lambda: set_graph_type("bar")).pack(pady=5)
-        Button(graph_type_dialog, text="Candlestick Chart", command=lambda: set_graph_type("candlestick")).pack(pady=5)
         Button(graph_type_dialog, text="Histogram", command=lambda: set_graph_type("histogram")).pack(pady=5)
-        Button(graph_type_dialog, text="Area Chart", command=lambda: set_graph_type("area")).pack(pady=5)
         Button(graph_type_dialog, text="Spline Chart", command=lambda: set_graph_type("spline")).pack(pady=5)
 
 # GRAPH RESIZING
@@ -353,23 +351,15 @@ class OpenUtopiaFinanceApp:
             self.history_index += 1
             self.update_graph()
         except ValueError:
-            messagebox.showerror("Error", "Invalid input. Please enter valid numbers for period and amount.")
+            messagebox.showerror("Error", "Invalid input. Please enter valid numbers.")
 
     def plot_income(self):
         """Plots the income data."""
-        self.ax.clear()  # Clear the previous plot
+        self.ax.clear()  
 
         if self.graph_type == "line":
-            # Linear chart (line chart)
+            # Line chart
             self.ax.plot(self.income_data["Period"], self.income_data["Amount"], marker="o")
-        
-        elif self.graph_type == "candlestick":
-            # Candlestick chart
-            # Assuming you have 'Open', 'Close', 'High', and 'Low' columns in your data
-            # Convert period to a datetime index if needed
-            income_candlestick_data = self.income_data.copy()
-            income_candlestick_data['Period'] = pd.to_datetime(income_candlestick_data['Period'])
-            mpf.plot(income_candlestick_data.set_index('Period'), type='candle', ax=self.ax)
 
         elif self.graph_type == "bar":
             # Bar chart
@@ -378,11 +368,6 @@ class OpenUtopiaFinanceApp:
         elif self.graph_type == "histogram":
             # Histogram
             self.ax.hist(self.income_data["Amount"], bins=10, color='blue', alpha=0.7)
-        
-        elif self.graph_type == "area":
-            # Area chart
-            self.ax.fill_between(self.income_data["Period"], self.income_data["Amount"], color="skyblue", alpha=0.4)
-            self.ax.plot(self.income_data["Period"], self.income_data["Amount"], color="Slateblue", alpha=0.6)
 
         elif self.graph_type == "spline":
             # Spline (smoothed line) chart
@@ -400,15 +385,16 @@ class OpenUtopiaFinanceApp:
         self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
         plt.xticks(rotation=45)
 
-        self.canvas.draw()  # Update the plot on the canvas
-# DONT TOUCH THIS
+        self.canvas.draw()  
+
+# Resize Icons
     def resize_icon(self, path, size):
         """Resizes an icon for the toolbar."""
         image = Image.open(path)
         image = image.resize(size, Image.Resampling.LANCZOS) 
         return ImageTk.PhotoImage(image)
     
-# SAVE GRAPH TO EXCEL FILE
+# Save Graph to Excel File
     def save_graph(self):
         """Save the income data and graph settings to an Excel file."""
         file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel Files", "*.xlsx")])
@@ -419,7 +405,6 @@ class OpenUtopiaFinanceApp:
                     # Save the income data
                     self.income_data.to_excel(writer, sheet_name="Income Data", index=False)
                 
-                # Save metadata (like graph type and theme) in a separate sheet
                     metadata = pd.DataFrame({
                         "Setting": ["GraphType", "Theme"],
                         "Value": [self.graph_type, self.current_theme]
@@ -430,7 +415,7 @@ class OpenUtopiaFinanceApp:
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to save file: {e}")
 
-# IMPORT EXCEL FILE
+# Import Excel File
     def open_file(self):
         """Load the income data and graph settings from an Excel file."""
         file_path = filedialog.askopenfilename(title="Open Excel File", filetypes=[("Excel Files", "*.xlsx")])
@@ -461,16 +446,8 @@ class OpenUtopiaFinanceApp:
                 self.income_data.plot(x="Period", y="Amount", marker="o", ax=self.ax, legend=False)
             elif self.graph_type == "bar":
                 self.income_data.plot(kind="bar", x="Period", y="Amount", ax=self.ax, legend=False)
-            elif self.graph_type == "candlestick":
-                # Assuming self.income_data contains columns: 'Period', 'Open', 'High', 'Low', 'Close'
-                data = self.income_data[['Period', 'Open', 'High', 'Low', 'Close']].copy()
-                data.set_index('Period', inplace=True)
-                mpf.plot(data, type='candle', ax=self.ax)
             elif self.graph_type == "histogram":
                 self.ax.hist(self.income_data["Amount"], bins=10)
-            elif self.graph_type == "area":
-                self.ax.fill_between(self.income_data["Period"], self.income_data["Amount"], color='skyblue', alpha=0.4)
-                self.ax.plot(self.income_data["Period"], self.income_data["Amount"], color='Slateblue', alpha=0.6)
             elif self.graph_type == "spline":
                 from scipy.interpolate import make_interp_spline
                 import numpy as np
