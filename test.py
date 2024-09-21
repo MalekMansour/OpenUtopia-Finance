@@ -1,7 +1,14 @@
-# Author: Malek Mansour
-# LICENSE: MIT License
-# Year Created: 2024
-# Description: N/A
+'''
+App: OpenUtopia Finance
+Author: Malek Mansour
+LICENSE: MIT License
+Year Created: 2024
+
+Description: 
+Financial management tool designed to help users visualize and analyze their income data through various graph 
+types. Features include the ability to create, load, and customize graphs, as well as user-friendly navigation 
+options. The app aims to empower users to make informed financial decisions through intuitive visualizations.
+'''
 
 # Imports
 import os
@@ -24,6 +31,12 @@ class OpenUtopiaFinanceApp:
     def __init__(self, root):
         self.root = root
         self.root.title("OpenUtopia Finance")
+        self.root.geometry("1200x900")
+
+        # Load the logo image
+        logo_image = Image.open("icons/logo/logo_openutopia.png")  
+        self.logo = ImageTk.PhotoImage(logo_image)
+        self.root.iconphoto(True, self.logo)
 
         # Default Grid Toggled OFF
         self.grid_shown = False
@@ -131,7 +144,7 @@ class OpenUtopiaFinanceApp:
 
         def open_website():
             """Opens the website to download the software."""
-            webbrowser.open("https://yoursoftwarewebsite.com")  
+            webbrowser.open("https://github.com/MalekMansour/OpenUtopia-Finance")  
             home_dialog.destroy()
 
         # Add buttons for the home page
@@ -300,7 +313,7 @@ class OpenUtopiaFinanceApp:
         """Opens a window to edit the graph type."""
         graph_type_dialog = Toplevel(self.root)
         graph_type_dialog.title("Edit Graph Type")
-        graph_type_dialog.geometry("300x400")
+        graph_type_dialog.geometry("300x300")
 
         Label(graph_type_dialog, text="Select Graph Type:").pack(pady=20)
 
@@ -353,9 +366,9 @@ class OpenUtopiaFinanceApp:
 
             self.figure.subplots_adjust(left=self.current_margins["left"], right=self.current_margins["right"],
                                     top=self.current_margins["top"], bottom=self.current_margins["bottom"])
+            
             self.canvas.draw()
 
-        # Bind scale adjustments to real-time updates
         left_scale.bind("<Motion>", update_margins)
         right_scale.bind("<Motion>", update_margins)
         top_scale.bind("<Motion>", update_margins)
