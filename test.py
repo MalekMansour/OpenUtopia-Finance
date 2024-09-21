@@ -105,6 +105,9 @@ class OpenUtopiaFinanceApp:
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
                 graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon, resize_icon]
         
+    def home(self):
+        pass
+
 # SHORTCUT BUTTON SECTION
     def bind_shortcuts(self):
         """Binds keyboard shortcuts."""
@@ -200,13 +203,13 @@ class OpenUtopiaFinanceApp:
     def change_theme(self):
         """Switches between multiple themes."""
         if self.current_theme == "default":
-            self.apply_theme("#000000", "#FFFFFF")  # Switch to dark theme
+            self.apply_theme("#0C0C0C", "#FFFFFF")  # Switch to dark theme
             self.current_theme = "dark"
         elif self.current_theme == "dark":
             self.apply_theme("#001F3F", "#FFFFFF")  # Switch to blue theme
             self.current_theme = "blue"
         elif self.current_theme == "blue":
-            self.apply_theme("#A04747", "#FFFFFF")  # Switch to red theme
+            self.apply_theme("#31363F", "#FFFFFF")  # Switch to red theme
             self.current_theme = "red"
         else:
             self.apply_theme("#F5F7F8", "#000000")  # Switch back to default theme
