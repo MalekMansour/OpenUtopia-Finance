@@ -5,8 +5,11 @@ OpenUtopia Finance is a comprehensive financial management application designed 
 
 * Add Data to your graph
 ![Image1](Screenshots/screenshot01.png)
+* Resize your graph
 ![Image2](Screenshots/screenshot02.png)
+* Customize your own shortcuts
 ![Image3](Screenshots/screenshot03.png)
+* Change your graph type (line, bar, histogram, spine)
 ![Image4](Screenshots/screenshot04.png)
 
 ## Features
