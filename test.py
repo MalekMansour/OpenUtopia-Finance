@@ -4,6 +4,8 @@
 # Description: N/A
 
 # Imports
+import os
+import sys
 import tkinter as tk
 from tkinter import filedialog, simpledialog, messagebox, Toplevel, Label, Button, Scale, HORIZONTAL
 from tkinter import ttk
@@ -16,6 +18,7 @@ import mplfinance as mpf
 import xlsxwriter
 import openpyxl
 import numpy as np
+import webbrowser
 
 class OpenUtopiaFinanceApp:
     def __init__(self, root):
@@ -88,7 +91,7 @@ class OpenUtopiaFinanceApp:
 
         # Icons & Their Functions
         tk.Button(toolbar_frame, image=open_icon, command=self.open_file).pack(side=tk.LEFT, padx=2)
-        tk.Button(toolbar_frame, image=home_icon, command=self.home).pack(side=tk.LEFT, padx=2)
+        tk.Button(toolbar_frame, image=home_icon, command=self.home_page).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=back_icon, command=self.go_back).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=forward_icon, command=self.go_forward).pack(side=tk.LEFT, padx=2)
         tk.Button(toolbar_frame, image=move_icon, command=self.enable_move).pack(side=tk.LEFT, padx=2)
@@ -105,8 +108,37 @@ class OpenUtopiaFinanceApp:
         self.icons = [open_icon, home_icon, back_icon, forward_icon, move_icon, zoom_icon,
                 graph_icon, edit_icon, theme_icon, save_icon, grid_icon, shortcuts_icon, resize_icon]
         
-    def home(self):
-        pass
+    def home_page(self):
+        """Opens the home page with options."""
+        home_dialog = tk.Toplevel(self.root)
+        home_dialog.title("Home Page")
+        home_dialog.geometry("300x200")
+
+        def new_graph():
+            """Restarts the program to create a new blank graph."""
+            python = sys.executable
+            os.execl(python, python, *sys.argv)  # Relaunch the program
+
+        def load_graph():
+            """Loads a graph using the existing open_file method."""
+            file_path = filedialog.askopenfilename(
+                title="Open Graph File", 
+                filetypes=[("CSV Files", "*.csv"), ("All Files", "*.*")]
+            )
+            if file_path:
+                self.open_file(file_path)  
+            home_dialog.destroy() 
+
+        def open_website():
+            """Opens the website to download the software."""
+            webbrowser.open("https://yoursoftwarewebsite.com")  
+            home_dialog.destroy()
+
+        # Add buttons for the home page
+        tk.Button(home_dialog, text="New Graph", command=new_graph).pack(pady=10)
+        tk.Button(home_dialog, text="Load Graph", command=load_graph).pack(pady=10)
+        tk.Button(home_dialog, text="Website", command=open_website).pack(pady=10)
+        tk.Button(home_dialog, text="Exit", command=home_dialog.destroy).pack(pady=10)
 
 # SHORTCUT BUTTON SECTION
     def bind_shortcuts(self):
