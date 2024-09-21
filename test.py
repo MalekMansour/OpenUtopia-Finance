@@ -48,9 +48,6 @@ class OpenUtopiaFinanceApp:
         self.history = []
         self.history_index = -1
 
-        # Set initial theme
-        self.apply_theme("default")
-
          # Shortcuts storage
         self.original_shortcuts = {
             "edit_income": "<Shift-X>",
@@ -213,7 +210,7 @@ class OpenUtopiaFinanceApp:
             self.current_theme = "blue"
         elif self.current_theme == "blue":
             self.apply_theme("#303030", "#FFFFFF")  # Switch to grey theme
-            self.current_theme = "red"
+            self.current_theme = "grey"
         else:
             self.apply_theme("#F5F7F8", "#000000")  # Switch back to default theme
             self.current_theme = "default"
@@ -271,17 +268,18 @@ class OpenUtopiaFinanceApp:
         """Opens a window to edit the graph type."""
         graph_type_dialog = Toplevel(self.root)
         graph_type_dialog.title("Edit Graph Type")
-        graph_type_dialog.geometry("300x350")
+        graph_type_dialog.geometry("300x400")
 
         Label(graph_type_dialog, text="Select Graph Type:").pack(pady=20)
 
         def set_graph_type(graph_type):
             self.graph_type = graph_type
-            self.update_graph()  
+            self.update_graph()  # Update the graph with the selected type
             graph_type_dialog.destroy()
 
         # Add buttons for each graph type
         Button(graph_type_dialog, text="Line Graph", command=lambda: set_graph_type("line")).pack(pady=5)
+        Button(graph_type_dialog, text="Line Graph with Dots", command=lambda: set_graph_type("line_with_dots")).pack(pady=5)
         Button(graph_type_dialog, text="Bar Graph", command=lambda: set_graph_type("bar")).pack(pady=5)
         Button(graph_type_dialog, text="Candlestick Chart", command=lambda: set_graph_type("candlestick")).pack(pady=5)
         Button(graph_type_dialog, text="Histogram", command=lambda: set_graph_type("histogram")).pack(pady=5)
@@ -455,51 +453,37 @@ class OpenUtopiaFinanceApp:
 # UPDATE GRAPH (DONT TOUCH)
     def update_graph(self):
         """Updates the graph with the current income data."""
-        self.ax.clear()  # Clear the previous plot
-
+        self.ax.clear()
         if not self.income_data.empty:
             if self.graph_type == "line":
-                # Line chart
-                self.income_data.plot(x="Period", y="Amount", ax=self.ax, legend=False, marker='o')
-
+                self.income_data.plot(x="Period", y="Amount", ax=self.ax, legend=False)
+            elif self.graph_type == "line_with_dots":
+                self.income_data.plot(x="Period", y="Amount", marker="o", ax=self.ax, legend=False)
             elif self.graph_type == "bar":
-                # Bar chart
                 self.income_data.plot(kind="bar", x="Period", y="Amount", ax=self.ax, legend=False)
-
             elif self.graph_type == "candlestick":
-                # Candlestick chart
-                income_candlestick_data = self.income_data.copy()
-                income_candlestick_data['Period'] = pd.to_datetime(income_candlestick_data['Period'])
-                mpf.plot(income_candlestick_data.set_index('Period'), type='candle', ax=self.ax)
-
+                # Assuming self.income_data contains columns: 'Period', 'Open', 'High', 'Low', 'Close'
+                data = self.income_data[['Period', 'Open', 'High', 'Low', 'Close']].copy()
+                data.set_index('Period', inplace=True)
+                mpf.plot(data, type='candle', ax=self.ax)
             elif self.graph_type == "histogram":
-                # Histogram
-                self.ax.hist(self.income_data["Amount"], bins=10, color='blue', alpha=0.7)
-
+                self.ax.hist(self.income_data["Amount"], bins=10)
             elif self.graph_type == "area":
-                # Area chart
-                self.ax.fill_between(self.income_data["Period"], self.income_data["Amount"], color="skyblue", alpha=0.4)
-                self.ax.plot(self.income_data["Period"], self.income_data["Amount"], color="Slateblue", alpha=0.6)
-
+                self.ax.fill_between(self.income_data["Period"], self.income_data["Amount"], color='skyblue', alpha=0.4)
+                self.ax.plot(self.income_data["Period"], self.income_data["Amount"], color='Slateblue', alpha=0.6)
             elif self.graph_type == "spline":
-                # Spline (smoothed line) chart
-                x = np.arange(len(self.income_data["Period"]))
-                z = np.polyfit(x, self.income_data["Amount"], 3)
-                p = np.poly1d(z)
-                self.ax.plot(self.income_data["Period"], p(x), color='green')
-
-            # Set the title, axis labels
-            self.ax.set_title("Income Data")
-            self.ax.set_xlabel("Period")
-            self.ax.set_ylabel("Amount")
-
-            # Rotate date labels if using datetime for Period
-            if pd.api.types.is_datetime64_any_dtype(self.income_data['Period']):
-                self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-                self.ax.xaxis.set_major_locator(mdates.MonthLocator())  # Adjust as necessary
-                plt.xticks(rotation=45)
-
-        self.canvas.draw()  # Update the canvas with the new plot
+                from scipy.interpolate import make_interp_spline
+                import numpy as np
+                periods = np.array(self.income_data["Period"].index.values, dtype=float)  # Convert Period to numeric
+                amounts = np.array(self.income_data["Amount"])
+                spline = make_interp_spline(periods, amounts)
+                smoothed_periods = np.linspace(periods.min(), periods.max(), 500)
+                smoothed_amounts = spline(smoothed_periods)
+                self.ax.plot(smoothed_periods, smoothed_amounts, color='green')
+        self.ax.set_title("Income Data")
+        self.ax.set_xlabel("Period")
+        self.ax.set_ylabel("Amount")
+        self.canvas.draw()
 
 if __name__ == "__main__":
     root = tk.Tk()
