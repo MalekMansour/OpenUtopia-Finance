@@ -49,7 +49,7 @@ class OpenUtopiaFinanceApp:
         self.history_index = -1
 
         # Set initial theme
-        self.apply_theme("#F5F7F8", "black")
+        self.apply_theme("default")
 
          # Shortcuts storage
         self.original_shortcuts = {
@@ -206,13 +206,13 @@ class OpenUtopiaFinanceApp:
     def change_theme(self):
         """Switches between multiple themes."""
         if self.current_theme == "default":
-            self.apply_theme("#0C0C0C", "#FFFFFF")  # Switch to dark theme
+            self.apply_theme("#1B1C1E", "#FFFFFF")  # Switch to dark theme
             self.current_theme = "dark"
         elif self.current_theme == "dark":
             self.apply_theme("#001F3F", "#FFFFFF")  # Switch to blue theme
             self.current_theme = "blue"
         elif self.current_theme == "blue":
-            self.apply_theme("#31363F", "#FFFFFF")  # Switch to red theme
+            self.apply_theme("#303030", "#FFFFFF")  # Switch to grey theme
             self.current_theme = "red"
         else:
             self.apply_theme("#F5F7F8", "#000000")  # Switch back to default theme
@@ -277,7 +277,7 @@ class OpenUtopiaFinanceApp:
 
         def set_graph_type(graph_type):
             self.graph_type = graph_type
-            self.update_graph()  # Update the graph with the selected type
+            self.update_graph()  
             graph_type_dialog.destroy()
 
         # Add buttons for each graph type
