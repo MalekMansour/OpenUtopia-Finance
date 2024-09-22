@@ -128,33 +128,18 @@ class OpenUtopiaFinanceApp:
         home_dialog.geometry("300x200")
 
         def new_graph():
-            """Restarts the program to create a new blank graph."""
             python = sys.executable
             os.execl(python, python, *sys.argv)  # Relaunch the program
 
-        def load_graph():
-            """Loads a graph from an Excel file."""
-            file_path = filedialog.askopenfilename(
-                title="Open Graph File",
-                filetypes=[("Excel Files", "*.xlsx"), ("All Files", "*.*")]
-            )
-            if file_path:
-                # Use pandas to read the Excel file
-                data = pd.read_excel(file_path)
-        
-                # Assuming open_file now handles Excel data; modify as needed
-                self.open_file(data)  # Process the Excel data in some way
-        
-            home_dialog.destroy()  # Destroy the dialog after loading
-
         def open_website():
-            """Opens the website to download the software."""
             webbrowser.open("https://github.com/MalekMansour/OpenUtopia-Finance")  
+
             home_dialog.destroy()
 
         # Add buttons for the home page
         tk.Button(home_dialog, text="New Graph", command=new_graph).pack(pady=10)
-        tk.Button(home_dialog, text="Load Graph", command=load_graph).pack(pady=10)
+        load_file_button = tk.Button(home_dialog, text="Load File", command=self.open_file)
+        load_file_button.pack(pady=10)
         tk.Button(home_dialog, text="Website", command=open_website).pack(pady=10)
         tk.Button(home_dialog, text="Exit", command=home_dialog.destroy).pack(pady=10)
 
