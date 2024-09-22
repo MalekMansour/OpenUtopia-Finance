@@ -133,14 +133,19 @@ class OpenUtopiaFinanceApp:
             os.execl(python, python, *sys.argv)  # Relaunch the program
 
         def load_graph():
-            """Loads a graph using the existing open_file method."""
+            """Loads a graph from an Excel file."""
             file_path = filedialog.askopenfilename(
-                title="Open Graph File", 
-                filetypes=[("CSV Files", "*.csv"), ("All Files", "*.*")]
+                title="Open Graph File",
+                filetypes=[("Excel Files", "*.xlsx"), ("All Files", "*.*")]
             )
             if file_path:
-                self.open_file(file_path)  
-            home_dialog.destroy() 
+                # Use pandas to read the Excel file
+                data = pd.read_excel(file_path)
+        
+                # Assuming open_file now handles Excel data; modify as needed
+                self.open_file(data)  # Process the Excel data in some way
+        
+            home_dialog.destroy()  # Destroy the dialog after loading
 
         def open_website():
             """Opens the website to download the software."""
@@ -462,25 +467,33 @@ class OpenUtopiaFinanceApp:
 
 # Import Excel File
     def open_file(self):
-        """Load the income data and graph settings from an Excel file."""
-        file_path = filedialog.askopenfilename(title="Open Excel File", filetypes=[("Excel Files", "*.xlsx")])
+        """Handles the action of opening a file (supports CSV and Excel files)."""
+        file_path = filedialog.askopenfilename(
+            title="Open Income Data",
+            filetypes=[("All Files", "*.*"), ("CSV Files", "*.csv"), ("Excel Files", "*.xlsx;*.xls")]
+        )
+    
         if file_path:
             try:
-                # Load the income data
-                self.income_data = pd.read_excel(file_path, sheet_name="Income Data")
+                # Check the file extension to determine how to load the file
+                if file_path.endswith('.xlsx') or file_path.endswith('.xls'):
+                    self.income_data = pd.read_excel(file_path)
+                elif file_path.endswith('.csv'):
+                    self.income_data = pd.read_csv(file_path)
+                else:
+                    raise ValueError("Unsupported file format. Please open CSV or Excel files.")
             
-            # Load the metadata
-                metadata = pd.read_excel(file_path, sheet_name="Metadata")
-                self.graph_type = metadata.loc[metadata['Setting'] == 'GraphType', 'Value'].values[0]
-                self.current_theme = metadata.loc[metadata['Setting'] == 'Theme', 'Value'].values[0]
+                # Plot the income data after successful loading
+                self.plot_income()
             
-                self.plot_income() 
-            
-                messagebox.showinfo("Success", "Data loaded successfully!")
+                # Append the current data to history for back/forward navigation
+                self.history.append(self.income_data.copy())
+                self.history_index += 1
+        
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load file: {e}")
 
-# UPDATE GRAPH (DONT TOUCH)
+# UPDATE GRAPH 
     def update_graph(self):
         """Updates the graph with the current income data."""
         self.ax.clear()
