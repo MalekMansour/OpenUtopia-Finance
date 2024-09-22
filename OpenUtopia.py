@@ -494,7 +494,7 @@ class OpenUtopiaFinanceApp:
             elif self.graph_type == "spline":
                 from scipy.interpolate import make_interp_spline
                 import numpy as np
-                periods = np.array(self.income_data["Period"].index.values, dtype=float)  # Convert Period to numeric
+                periods = np.array(self.income_data["Period"].index.values, dtype=float)  
                 amounts = np.array(self.income_data["Amount"])
                 spline = make_interp_spline(periods, amounts)
                 smoothed_periods = np.linspace(periods.min(), periods.max(), 500)
