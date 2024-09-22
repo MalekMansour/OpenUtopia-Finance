@@ -128,28 +128,18 @@ class OpenUtopiaFinanceApp:
         home_dialog.geometry("300x200")
 
         def new_graph():
-            """Restarts the program to create a new blank graph."""
             python = sys.executable
             os.execl(python, python, *sys.argv)  # Relaunch the program
 
-        def load_graph():
-            """Loads a graph using the existing open_file method."""
-            file_path = filedialog.askopenfilename(
-                title="Open Graph File", 
-                filetypes=[("CSV Files", "*.csv"), ("All Files", "*.*")]
-            )
-            if file_path:
-                self.open_file(file_path)  
-            home_dialog.destroy() 
-
         def open_website():
-            """Opens the website to download the software."""
             webbrowser.open("https://github.com/MalekMansour/OpenUtopia-Finance")  
+
             home_dialog.destroy()
 
         # Add buttons for the home page
         tk.Button(home_dialog, text="New Graph", command=new_graph).pack(pady=10)
-        tk.Button(home_dialog, text="Load Graph", command=load_graph).pack(pady=10)
+        load_file_button = tk.Button(home_dialog, text="Load File", command=self.open_file)
+        load_file_button.pack(pady=10)
         tk.Button(home_dialog, text="Website", command=open_website).pack(pady=10)
         tk.Button(home_dialog, text="Exit", command=home_dialog.destroy).pack(pady=10)
 
@@ -462,25 +452,33 @@ class OpenUtopiaFinanceApp:
 
 # Import Excel File
     def open_file(self):
-        """Load the income data and graph settings from an Excel file."""
-        file_path = filedialog.askopenfilename(title="Open Excel File", filetypes=[("Excel Files", "*.xlsx")])
+        """Handles the action of opening a file (supports CSV and Excel files)."""
+        file_path = filedialog.askopenfilename(
+            title="Open Income Data",
+            filetypes=[("All Files", "*.*"), ("Excel Files", "*.xlsx;*.xls"), ("CSV Files", "*.csv")]
+        )
+    
         if file_path:
             try:
-                # Load the income data
-                self.income_data = pd.read_excel(file_path, sheet_name="Income Data")
+                # Check the file extension to determine how to load the file
+                if file_path.endswith('.xlsx') or file_path.endswith('.xls'):
+                    self.income_data = pd.read_excel(file_path)
+                elif file_path.endswith('.csv'):
+                    self.income_data = pd.read_csv(file_path)
+                else:
+                    raise ValueError("Unsupported file format. Please open CSV or Excel files.")
             
-            # Load the metadata
-                metadata = pd.read_excel(file_path, sheet_name="Metadata")
-                self.graph_type = metadata.loc[metadata['Setting'] == 'GraphType', 'Value'].values[0]
-                self.current_theme = metadata.loc[metadata['Setting'] == 'Theme', 'Value'].values[0]
+                # Plot the income data after successful loading
+                self.plot_income()
             
-                self.plot_income() 
-            
-                messagebox.showinfo("Success", "Data loaded successfully!")
+                # Append the current data to history for back/forward navigation
+                self.history.append(self.income_data.copy())
+                self.history_index += 1
+        
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load file: {e}")
 
-# UPDATE GRAPH (DONT TOUCH)
+# UPDATE GRAPH 
     def update_graph(self):
         """Updates the graph with the current income data."""
         self.ax.clear()
