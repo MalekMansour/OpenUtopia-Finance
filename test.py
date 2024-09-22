@@ -470,7 +470,7 @@ class OpenUtopiaFinanceApp:
         """Handles the action of opening a file (supports CSV and Excel files)."""
         file_path = filedialog.askopenfilename(
             title="Open Income Data",
-            filetypes=[("All Files", "*.*"), ("CSV Files", "*.csv"), ("Excel Files", "*.xlsx;*.xls")]
+            filetypes=[("All Files", "*.*"), ("Excel Files", "*.xlsx;*.xls"), ("CSV Files", "*.csv")]
         )
     
         if file_path:
